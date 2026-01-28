@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>H2H Wordle</title>
+  <title>PVP Wordle</title>
   <meta name="theme-color" content="#0f1220" />
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -12,7 +12,7 @@
     <header class="top">
       <div class="brand">
         <span class="dot"></span>
-        <span>H2H Wordle</span>
+        <span>PVPWordle</span>
       </div>
       <div class="roompill" id="roomPill">No room</div>
     </header>
@@ -26,7 +26,7 @@
 
         <div class="field">
           <label for="name">Your name</label>
-          <input id="name" maxlength="24" placeholder="Akaki" autocomplete="nickname" />
+          <input id="name" maxlength="24" placeholder="akaki :)" autocomplete="nickname" />
         </div>
 
         <div class="actions">
@@ -42,8 +42,8 @@
         <div class="field">
           <label for="mode">Mode</label>
           <select id="mode">
-            <option value="random">Random words</option>
-            <option value="custom">Make each other’s word</option>
+            <option value="random">Random words (5 letters)</option>
+            <option value="custom">Make each other’s word (5–20 letters)</option>
           </select>
         </div>
 
@@ -53,8 +53,8 @@
             <input id="timer" type="number" min="30" max="600" value="120" inputmode="numeric" />
           </div>
           <div id="wordBox" style="display:none;">
-            <label for="word">Your word for opponent</label>
-            <input id="word" maxlength="5" placeholder="crane" autocapitalize="none" />
+            <label for="word">Your word for opponent (5–20 letters)</label>
+            <input id="word" maxlength="20" placeholder="type up to 20…" autocapitalize="none" />
           </div>
         </div>
 
@@ -90,16 +90,18 @@
         </div>
 
         <div class="guessBar">
-          <input id="guess" maxlength="5" placeholder="type guess…" disabled autocapitalize="none" />
+          <input id="guess" maxlength="20" placeholder="type guess…" disabled autocapitalize="none" />
           <button class="btn" id="guessBtn" disabled>Guess</button>
         </div>
+
+        <button class="btn ghost" id="rematchBtn" style="display:none;">Rematch</button>
 
         <div class="toast" id="toast" hidden></div>
       </section>
     </main>
 
     <footer class="foot">
-      <span>Tip: Gaicani vinme... Da Gaugzavne Kodi megobars</span>
+      <span>Tip: Gaicani vinme..... Da Magas Etamashe lol</span>
     </footer>
   </div>
 

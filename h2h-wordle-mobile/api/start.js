@@ -1,13 +1,13 @@
 import { redis, json, roomKey } from "./_redis.js";
 
-const WORDS = [
+const WORDS5 = [
   "about","other","which","their","there","apple","spice","crane","stone","light",
   "smile","fresh","brick","chair","crown","trust","tears","laugh","power","dance",
   "zesty","sugar","green","black","white","flame","glory","heart","dream","storm"
 ];
 
-function pick() {
-  return WORDS[Math.floor(Math.random() * WORDS.length)];
+function pick5() {
+  return WORDS5[Math.floor(Math.random() * WORDS5.length)];
 }
 
 export default async function handler(req, res) {
@@ -28,29 +28,36 @@ export default async function handler(req, res) {
     return json(res, 409, { error: "Both players must be ready" });
   }
 
+  // choose secrets
   if (room.mode === "custom") {
     if (!room.players.host.secretForOpponent || !room.players.guest.secretForOpponent) {
-      return json(res, 409, { error: "Both must set a 5-letter word" });
+      return json(res, 409, { error: "Both must set a word" });
     }
-    room.random.guestSecret = room.players.host.secretForOpponent; // guest solves
-    room.random.hostSecret = room.players.guest.secretForOpponent; // host solves
+    if (room.players.host.secretForOpponent.length !== room.wordLength ||
+        room.players.guest.secretForOpponent.length !== room.wordLength) {
+      return json(res, 409, { error: "Word lengths must match" });
+    }
+
+    // host gave word for guest to solve; guest gave word for host to solve
+    room.random.guestSecret = room.players.host.secretForOpponent;
+    room.random.hostSecret = room.players.guest.secretForOpponent;
   } else {
-    room.random.hostSecret = pick();
-    room.random.guestSecret = pick();
+    room.wordLength = 5;
+    room.random.hostSecret = pick5();
+    room.random.guestSecret = pick5();
   }
 
+  // reset round state
   room.status = "running";
   room.startAt = Date.now();
 
-  room.players.host.guesses = [];
-  room.players.host.results = [];
-  room.players.host.score = 0;
-  room.players.host.finishedAt = null;
-
-  room.players.guest.guesses = [];
-  room.players.guest.results = [];
-  room.players.guest.score = 0;
-  room.players.guest.finishedAt = null;
+  for (const pid of ["host","guest"]) {
+    const p = room.players[pid];
+    p.guesses = [];
+    p.results = [];
+    p.score = 0;
+    p.finishedAt = null;
+  }
 
   room.lastUpdate = Date.now();
   await redis.set(key, room, { ex: 60 * 60 });

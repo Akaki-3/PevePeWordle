@@ -1,4 +1,4 @@
-import { redis, json, roomKey, normalizeWord, isValidWord, evaluateGuess } from "./_redis.js";
+import { redis, json, roomKey, normalizeWord, isValidWordLen, evaluateGuess } from "./_redis.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return json(res, 405, { error: "POST only" });
@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const body = await readJson(req);
   const code = String(body?.code || "").trim().toUpperCase();
   const playerId = String(body?.playerId || "");
-  const guess = normalizeWord(body?.guess);
+  const guessRaw = normalizeWord(body?.guess);
 
   const key = roomKey(code);
   const room = await redis.get(key);
@@ -25,20 +25,24 @@ export default async function handler(req, res) {
     return json(res, 409, { error: "Time is up" });
   }
 
-  if (!isValidWord(guess)) return json(res, 400, { error: "Guess must be 5 letters A-Z" });
+  const N = room.wordLength || 5;
+
+  if (!isValidWordLen(guessRaw, N, N)) {
+    return json(res, 400, { error: `Guess must be exactly ${N} letters (A–Z)` });
+  }
 
   const p = room.players[playerId];
   if (p.finishedAt) return json(res, 409, { error: "You already finished" });
   if (p.guesses.length >= 6) return json(res, 409, { error: "No guesses left" });
-  if (p.guesses.includes(guess)) return json(res, 409, { error: "Already guessed" });
+  if (p.guesses.includes(guessRaw)) return json(res, 409, { error: "Already guessed" });
 
   const secret = (playerId === "host") ? room.random.hostSecret : room.random.guestSecret;
-  const pattern = evaluateGuess(secret, guess);
+  const pattern = evaluateGuess(secret, guessRaw);
 
-  p.guesses.push(guess);
+  p.guesses.push(guessRaw);
   p.results.push(pattern);
 
-  const won = (guess === secret);
+  const won = (guessRaw === secret);
   if (won) {
     p.finishedAt = now;
     const guessBonus = (7 - p.guesses.length) * 10;
@@ -68,14 +72,21 @@ function publicRoom(room) {
     guesses: p.guesses, results: p.results, score: p.score, finishedAt: p.finishedAt
   });
 
-  return {
+  const out = {
     code: room.code,
     status: room.status,
     mode: room.mode,
     timerSeconds: room.timerSeconds,
     startAt: room.startAt,
+    wordLength: room.wordLength,
     players: { host: cleanPlayer(room.players.host), guest: cleanPlayer(room.players.guest) }
   };
+
+  if (room.status === "finished") {
+    out.reveal = { host: room.random.hostSecret, guest: room.random.guestSecret };
+  }
+
+  return out;
 }
 
 async function readJson(req) {

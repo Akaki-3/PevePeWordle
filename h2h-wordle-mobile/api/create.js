@@ -16,10 +16,13 @@ export default async function handler(req, res) {
   const room = {
     code,
     createdAt: Date.now(),
-    mode: "random", // "random" or "custom"
-    status: "lobby", // lobby | running | finished
+    mode: "random", // random/custom
+    status: "lobby",
     timerSeconds: 120,
     startAt: null,
+
+    // word length (custom mode can be 5..20). random mode uses 5.
+    wordLength: 5,
 
     players: {
       host: {
@@ -43,7 +46,7 @@ export default async function handler(req, res) {
     lastUpdate: Date.now()
   };
 
-  await redis.set(roomKey(code), room, { ex: 60 * 60 }); // 1 hour
+  await redis.set(roomKey(code), room, { ex: 60 * 60 });
   return json(res, 200, { code, playerId: "host", name });
 }
 

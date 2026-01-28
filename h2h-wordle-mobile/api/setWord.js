@@ -1,4 +1,4 @@
-import { redis, json, roomKey, normalizeWord, isValidWord } from "./_redis.js";
+import { redis, json, roomKey, normalizeWord, isValidWordLen } from "./_redis.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return json(res, 405, { error: "POST only" });
@@ -21,11 +21,37 @@ export default async function handler(req, res) {
   room.timerSeconds = timerSeconds;
 
   if (room.mode === "custom") {
-    if (!isValidWord(word)) return json(res, 400, { error: "Word must be 5 letters A-Z" });
-    if (playerId === "host") room.players.host.secretForOpponent = word;
-    if (playerId === "guest") room.players.guest.secretForOpponent = word;
-    room.players[playerId].ready = true;
+    // allow 5..20 letters
+    if (!isValidWordLen(word, 5, 20)) {
+      return json(res, 400, { error: "Word must be 5–20 letters (A–Z only)" });
+    }
+
+    // host decides the wordLength based on their first submission
+    if (playerId === "host") {
+      room.wordLength = word.length;
+      room.players.host.secretForOpponent = word;
+      room.players.host.ready = true;
+
+      // if guest already entered something, enforce length
+      if (room.players.guest?.secretForOpponent && room.players.guest.secretForOpponent.length !== room.wordLength) {
+        room.players.guest.ready = false;
+      }
+    } else {
+      // guest must match host length (if host already set it)
+      if (room.players.host.secretForOpponent && word.length !== room.wordLength) {
+        return json(res, 400, { error: `Your word must be ${room.wordLength} letters (match host)` });
+      }
+      room.players.guest.secretForOpponent = word;
+      room.players.guest.ready = true;
+
+      // if host hasn't set yet, tentatively set length from guest word
+      if (!room.players.host.secretForOpponent) {
+        room.wordLength = word.length;
+      }
+    }
   } else {
+    // random mode -> always 5
+    room.wordLength = 5;
     room.players[playerId].ready = true;
   }
 
@@ -46,6 +72,7 @@ function publicRoom(room) {
     mode: room.mode,
     timerSeconds: room.timerSeconds,
     startAt: room.startAt,
+    wordLength: room.wordLength,
     players: { host: cleanPlayer(room.players.host), guest: cleanPlayer(room.players.guest) }
   };
 }

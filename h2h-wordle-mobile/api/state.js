@@ -20,7 +20,13 @@ export default async function handler(req, res) {
     }
   }
 
-  return json(res, 200, { room: publicRoom(room), remaining });
+  const pub = publicRoom(room);
+
+  if (room.status === "finished") {
+    pub.reveal = { host: room.random.hostSecret, guest: room.random.guestSecret };
+  }
+
+  return json(res, 200, { room: pub, remaining });
 }
 
 function publicRoom(room) {
@@ -35,6 +41,7 @@ function publicRoom(room) {
     mode: room.mode,
     timerSeconds: room.timerSeconds,
     startAt: room.startAt,
+    wordLength: room.wordLength || 5,
     players: { host: cleanPlayer(room.players.host), guest: cleanPlayer(room.players.guest) }
   };
 }

@@ -11,12 +11,16 @@ export function json(res, status, data) {
   res.end(JSON.stringify(data));
 }
 
+// normalize: keep letters only, lowercased
 export function normalizeWord(w) {
-  return String(w || "").trim().toLowerCase();
+  return String(w || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z]/g, "");
 }
 
-export function isValidWord(w) {
-  return /^[a-z]{5}$/.test(w);
+export function isValidWordLen(w, min = 5, max = 20) {
+  return typeof w === "string" && w.length >= min && w.length <= max && /^[a-z]+$/.test(w);
 }
 
 export function roomKey(code) {
@@ -30,27 +34,28 @@ export function makeCode() {
   return out;
 }
 
-// Wordle evaluation: returns array of "g" (green), "y" (yellow), "b" (black)
+// Wordle evaluation for any length N: returns array of "g","y","b"
 export function evaluateGuess(secret, guess) {
-  secret = secret.split("");
-  guess = guess.split("");
+  const N = secret.length;
+  const s = secret.split("");
+  const g = guess.split("");
 
-  const result = Array(5).fill("b");
-  const used = Array(5).fill(false);
+  const result = Array(N).fill("b");
+  const used = Array(N).fill(false);
 
-  // Greens
-  for (let i = 0; i < 5; i++) {
-    if (guess[i] === secret[i]) {
+  // greens
+  for (let i = 0; i < N; i++) {
+    if (g[i] === s[i]) {
       result[i] = "g";
       used[i] = true;
-      guess[i] = null;
+      g[i] = null;
     }
   }
 
-  // Yellows
-  for (let i = 0; i < 5; i++) {
-    if (guess[i] == null) continue;
-    const idx = secret.findIndex((c, j) => !used[j] && c === guess[i]);
+  // yellows
+  for (let i = 0; i < N; i++) {
+    if (g[i] == null) continue;
+    const idx = s.findIndex((c, j) => !used[j] && c === g[i]);
     if (idx !== -1) {
       result[i] = "y";
       used[idx] = true;

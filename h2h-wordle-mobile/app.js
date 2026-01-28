@@ -29,14 +29,17 @@ function api(path, body) {
   });
 }
 
-function buildBoard(el, guesses, results) {
+function buildBoard(el, guesses, results, N) {
   el.innerHTML = "";
   for (let r = 0; r < 6; r++) {
     const row = document.createElement("div");
     row.className = "row5";
+    row.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
+
     const g = guesses?.[r] || "";
     const res = results?.[r] || [];
-    for (let c = 0; c < 5; c++) {
+
+    for (let c = 0; c < N; c++) {
       const cell = document.createElement("div");
       cell.className = "cell " + (res[c] || "");
       cell.textContent = (g[c] || "");
@@ -54,6 +57,8 @@ function render() {
   const mode = $("mode").value;
   $("wordBox").style.display = (mode === "custom") ? "block" : "none";
 
+  const rematchBtn = $("rematchBtn");
+
   if (!room) {
     $("statusText").textContent = "Create or join a room.";
     $("startBtn").disabled = true;
@@ -61,10 +66,18 @@ function render() {
     $("guessBtn").disabled = true;
     $("timerBox").textContent = "--";
     $("scoreboard").innerHTML = "";
-    buildBoard($("yourBoard"), [], []);
-    buildBoard($("oppBoard"), [], []);
+    rematchBtn.style.display = "none";
+    $("gameSub").textContent = "First to solve wins more points.";
+    buildBoard($("yourBoard"), [], [], 5);
+    buildBoard($("oppBoard"), [], [], 5);
     return;
   }
+
+  const N = room.wordLength || 5;
+
+  // set guess input length based on room
+  $("guess").maxLength = N;
+  $("guess").placeholder = `type ${N} letters…`;
 
   const you = room.players[state.playerId];
   const oppId = state.playerId === "host" ? "guest" : "host";
@@ -73,14 +86,15 @@ function render() {
   $("youTitle").textContent = `You (${you?.name || ""})`;
   $("oppTitle").textContent = opp ? `Opponent (${opp.name})` : "Opponent (waiting…)";
 
-  buildBoard($("yourBoard"), you?.guesses, you?.results);
-  buildBoard($("oppBoard"), opp?.guesses, opp?.results);
+  buildBoard($("yourBoard"), you?.guesses, you?.results, N);
+  buildBoard($("oppBoard"), opp?.guesses, opp?.results, N);
 
   const rem = (room.status === "running") ? (state.remaining ?? 0) : null;
   $("timerBox").textContent = room.status === "running"
     ? `⏱ ${rem}s`
     : (room.status === "finished" ? "Finished" : "Lobby");
 
+  // scoreboard
   $("scoreboard").innerHTML = "";
   ["host","guest"].forEach((pid) => {
     const p = room.players[pid];
@@ -98,6 +112,7 @@ function render() {
     $("scoreboard").appendChild(div);
   });
 
+  // start button
   const canStart = state.playerId === "host"
     && room.status === "lobby"
     && !!room.players.guest
@@ -110,10 +125,28 @@ function render() {
   $("guess").disabled = !canGuess;
   $("guessBtn").disabled = !canGuess;
 
+  // rematch button
+  if (room.status === "finished") {
+    rematchBtn.style.display = "block";
+    rematchBtn.disabled = (state.playerId !== "host");
+  } else {
+    rematchBtn.style.display = "none";
+  }
+
+  // reveal words after finish
+  const sub = $("gameSub");
+  if (room.status === "finished" && room.reveal) {
+    const yourWord = state.playerId === "host" ? room.reveal.host : room.reveal.guest;
+    const oppWord  = state.playerId === "host" ? room.reveal.guest : room.reveal.host;
+    sub.textContent = `Finished. Your word: ${String(yourWord).toUpperCase()} • Opponent word: ${String(oppWord).toUpperCase()}`;
+  } else {
+    sub.textContent = "First to solve wins more points.";
+  }
+
   $("statusText").textContent =
     room.status === "lobby" ? "Lobby: set ready. Host can start when both ready."
-    : room.status === "running" ? "Game on. Type a 5-letter guess."
-    : "Game finished. Create a new room to play again.";
+    : room.status === "running" ? `Game on. Guess exactly ${N} letters.`
+    : "Game finished. Host can rematch.";
 }
 
 async function poll() {
@@ -206,6 +239,14 @@ async function submitGuess() {
     render();
   } catch (e) { toast(e.message); }
 }
+
+$("rematchBtn").addEventListener("click", async () => {
+  try {
+    await api("/api/rematch", { code: state.code, playerId: state.playerId });
+    toast("Rematch: set ready again ✅");
+    poll();
+  } catch (e) { toast(e.message); }
+});
 
 function escapeHtml(s){
   return String(s).replace(/[&<>"']/g, (c) => ({
