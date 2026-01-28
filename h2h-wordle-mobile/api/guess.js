@@ -1,0 +1,86 @@
+import { redis, json, roomKey, normalizeWord, isValidWord, evaluateGuess } from "./_redis.js";
+
+export default async function handler(req, res) {
+  if (req.method !== "POST") return json(res, 405, { error: "POST only" });
+
+  const body = await readJson(req);
+  const code = String(body?.code || "").trim().toUpperCase();
+  const playerId = String(body?.playerId || "");
+  const guess = normalizeWord(body?.guess);
+
+  const key = roomKey(code);
+  const room = await redis.get(key);
+  if (!room) return json(res, 404, { error: "Room not found" });
+  if (room.status !== "running") return json(res, 409, { error: "Game not running" });
+  if (playerId !== "host" && playerId !== "guest") return json(res, 400, { error: "Bad playerId" });
+  if (playerId === "guest" && !room.players.guest) return json(res, 409, { error: "No guest" });
+
+  const now = Date.now();
+  const elapsed = Math.floor((now - room.startAt) / 1000);
+  const remaining = room.timerSeconds - elapsed;
+  if (remaining <= 0) {
+    room.status = "finished";
+    room.lastUpdate = Date.now();
+    await redis.set(key, room, { ex: 60 * 60 });
+    return json(res, 409, { error: "Time is up" });
+  }
+
+  if (!isValidWord(guess)) return json(res, 400, { error: "Guess must be 5 letters A-Z" });
+
+  const p = room.players[playerId];
+  if (p.finishedAt) return json(res, 409, { error: "You already finished" });
+  if (p.guesses.length >= 6) return json(res, 409, { error: "No guesses left" });
+  if (p.guesses.includes(guess)) return json(res, 409, { error: "Already guessed" });
+
+  const secret = (playerId === "host") ? room.random.hostSecret : room.random.guestSecret;
+  const pattern = evaluateGuess(secret, guess);
+
+  p.guesses.push(guess);
+  p.results.push(pattern);
+
+  const won = (guess === secret);
+  if (won) {
+    p.finishedAt = now;
+    const guessBonus = (7 - p.guesses.length) * 10;
+    p.score = 100 + Math.max(0, remaining) + guessBonus;
+  } else if (p.guesses.length >= 6) {
+    p.finishedAt = now;
+    p.score = 0;
+  }
+
+  const hostDone = !!room.players.host.finishedAt;
+  const guestDone = !!room.players.guest.finishedAt;
+  const elapsed2 = Math.floor((Date.now() - room.startAt) / 1000);
+
+  if (elapsed2 >= room.timerSeconds || (hostDone && guestDone)) {
+    room.status = "finished";
+  }
+
+  room.lastUpdate = Date.now();
+  await redis.set(key, room, { ex: 60 * 60 });
+
+  return json(res, 200, { ok: true, pattern, won, room: publicRoom(room) });
+}
+
+function publicRoom(room) {
+  const cleanPlayer = (p) => !p ? null : ({
+    id: p.id, name: p.name, ready: p.ready,
+    guesses: p.guesses, results: p.results, score: p.score, finishedAt: p.finishedAt
+  });
+
+  return {
+    code: room.code,
+    status: room.status,
+    mode: room.mode,
+    timerSeconds: room.timerSeconds,
+    startAt: room.startAt,
+    players: { host: cleanPlayer(room.players.host), guest: cleanPlayer(room.players.guest) }
+  };
+}
+
+async function readJson(req) {
+  const chunks = [];
+  for await (const c of req) chunks.push(c);
+  try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); }
+  catch { return {}; }
+}

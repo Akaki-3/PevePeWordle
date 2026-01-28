@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>H2H Wordle</title>
+  <meta name="theme-color" content="#0f1220" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">
+        <span class="dot"></span>
+        <span>H2H Wordle</span>
+      </div>
+      <div class="roompill" id="roomPill">No room</div>
+    </header>
+
+    <main class="stack">
+      <section class="card lobby">
+        <div class="cardhead">
+          <h1>Lobby</h1>
+          <p class="sub">Create a room or join with a code. Then pick a mode, ready up, and start.</p>
+        </div>
+
+        <div class="field">
+          <label for="name">Your name</label>
+          <input id="name" maxlength="24" placeholder="Akaki" autocomplete="nickname" />
+        </div>
+
+        <div class="actions">
+          <button class="btn" id="createBtn">Create room</button>
+          <div class="codeRow">
+            <input id="code" maxlength="6" placeholder="ROOM" autocapitalize="characters" />
+            <button class="btn ghost" id="joinBtn">Join</button>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="field">
+          <label for="mode">Mode</label>
+          <select id="mode">
+            <option value="random">Random words</option>
+            <option value="custom">Make each other’s word</option>
+          </select>
+        </div>
+
+        <div class="field two">
+          <div>
+            <label for="timer">Timer (seconds)</label>
+            <input id="timer" type="number" min="30" max="600" value="120" inputmode="numeric" />
+          </div>
+          <div id="wordBox" style="display:none;">
+            <label for="word">Your word for opponent</label>
+            <input id="word" maxlength="5" placeholder="crane" autocapitalize="none" />
+          </div>
+        </div>
+
+        <div class="actions twoBtns">
+          <button class="btn" id="readyBtn">Set ready</button>
+          <button class="btn danger" id="startBtn" disabled>Start (host)</button>
+        </div>
+
+        <p class="hint" id="statusText">Create or join a room.</p>
+      </section>
+
+      <section class="card game">
+        <div class="gameTop">
+          <div>
+            <h2>Game</h2>
+            <p class="sub" id="gameSub">First to solve wins more points.</p>
+          </div>
+          <div class="timer" id="timerBox">--</div>
+        </div>
+
+        <div class="scoreboard" id="scoreboard"></div>
+
+        <div class="boards">
+          <div class="boardWrap">
+            <div class="boardTitle" id="youTitle">You</div>
+            <div class="board" id="yourBoard"></div>
+          </div>
+
+          <div class="boardWrap">
+            <div class="boardTitle" id="oppTitle">Opponent</div>
+            <div class="board" id="oppBoard"></div>
+          </div>
+        </div>
+
+        <div class="guessBar">
+          <input id="guess" maxlength="5" placeholder="type guess…" disabled autocapitalize="none" />
+          <button class="btn" id="guessBtn" disabled>Guess</button>
+        </div>
+
+        <div class="toast" id="toast" hidden></div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span>Tip: Gaicani vinme... Da Gaugzavne Kodi megobars</span>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
