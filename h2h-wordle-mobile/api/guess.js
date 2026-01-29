@@ -25,7 +25,8 @@ export default async function handler(req, res) {
     return json(res, 409, { error: "Time is up" });
   }
 
-  const N = room.wordLength || 5;
+  const secret = playerId === "host" ? room.random.hostSecret : room.random.guestSecret;
+  const N = secret.length;
 
   if (!isValidWordLen(guessRaw, N, N)) {
     return json(res, 400, { error: `Guess must be exactly ${N} letters (A–Z)` });
@@ -36,7 +37,6 @@ export default async function handler(req, res) {
   if (p.guesses.length >= 6) return json(res, 409, { error: "No guesses left" });
   if (p.guesses.includes(guessRaw)) return json(res, 409, { error: "Already guessed" });
 
-  const secret = playerId === "host" ? room.random.hostSecret : room.random.guestSecret;
   const pattern = evaluateGuess(secret, guessRaw);
 
   p.guesses.push(guessRaw);

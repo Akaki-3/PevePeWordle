@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   const body = await readJson(req);
   const code = String(body?.code || "").trim().toUpperCase();
   const playerId = String(body?.playerId || "");
-  const mode = String(body?.mode || "random"); // random/custom
+  const mode = String(body?.mode || "random");
   const timerSeconds = Math.max(30, Math.min(600, Number(body?.timerSeconds || 120)));
   const word = normalizeWord(body?.word);
 
@@ -17,7 +17,6 @@ export default async function handler(req, res) {
   if (playerId !== "host" && playerId !== "guest") return json(res, 400, { error: "Bad playerId" });
   if (playerId === "guest" && !room.players.guest) return json(res, 409, { error: "No guest yet" });
 
-  // room mode is source of truth; host syncs it via config, but allow setWord to set it too (safe)
   room.mode = mode === "custom" ? "custom" : "random";
   room.timerSeconds = timerSeconds;
 
@@ -25,26 +24,8 @@ export default async function handler(req, res) {
     if (!isValidWordLen(word, 5, 20)) {
       return json(res, 400, { error: "Word must be 5–20 letters (A–Z only)" });
     }
-
-    if (playerId === "host") {
-      room.wordLength = word.length;
-      room.players.host.secretForOpponent = word;
-      room.players.host.ready = true;
-
-      if (room.players.guest?.secretForOpponent && room.players.guest.secretForOpponent.length !== room.wordLength) {
-        room.players.guest.ready = false;
-      }
-    } else {
-      if (room.players.host.secretForOpponent && word.length !== room.wordLength) {
-        return json(res, 400, { error: `Your word must be ${room.wordLength} letters (match host)` });
-      }
-      room.players.guest.secretForOpponent = word;
-      room.players.guest.ready = true;
-
-      if (!room.players.host.secretForOpponent) {
-        room.wordLength = word.length;
-      }
-    }
+    room.players[playerId].secretForOpponent = word;
+    room.players[playerId].ready = true;
   } else {
     room.wordLength = 5;
     room.players[playerId].ready = true;

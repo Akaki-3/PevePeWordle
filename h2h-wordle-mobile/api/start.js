@@ -32,17 +32,20 @@ export default async function handler(req, res) {
     if (!room.players.host.secretForOpponent || !room.players.guest.secretForOpponent) {
       return json(res, 409, { error: "Both must set a word" });
     }
-    if (room.players.host.secretForOpponent.length !== room.wordLength ||
-        room.players.guest.secretForOpponent.length !== room.wordLength) {
-      return json(res, 409, { error: "Word lengths must match" });
-    }
 
-    room.random.guestSecret = room.players.host.secretForOpponent; // guest solves host word
-    room.random.hostSecret = room.players.guest.secretForOpponent; // host solves guest word
+    // guest solves host word, host solves guest word (lengths can differ)
+    room.random.guestSecret = room.players.host.secretForOpponent;
+    room.random.hostSecret  = room.players.guest.secretForOpponent;
+
+    room.wordLengths = {
+      host: room.random.hostSecret.length,
+      guest: room.random.guestSecret.length
+    };
   } else {
     room.wordLength = 5;
     room.random.hostSecret = pick5();
     room.random.guestSecret = pick5();
+    room.wordLengths = { host: 5, guest: 5 };
   }
 
   room.status = "running";

@@ -41,7 +41,6 @@ export function evaluateGuess(secret, guess) {
   const result = Array(N).fill("b");
   const used = Array(N).fill(false);
 
-  // greens
   for (let i = 0; i < N; i++) {
     if (g[i] === s[i]) {
       result[i] = "g";
@@ -50,7 +49,6 @@ export function evaluateGuess(secret, guess) {
     }
   }
 
-  // yellows
   for (let i = 0; i < N; i++) {
     if (g[i] == null) continue;
     const idx = s.findIndex((c, j) => !used[j] && c === g[i]);
@@ -84,13 +82,13 @@ export function publicRoom(room) {
     timerSeconds: room.timerSeconds,
     startAt: room.startAt,
     wordLength: room.wordLength || 5,
+    wordLengths: room.wordLengths || null,
     players: {
       host: cleanPlayer(room.players.host),
       guest: cleanPlayer(room.players.guest)
     }
   };
 
-  // only reveal after finished
   if (room.status === "finished") {
     out.reveal = {
       host: room.random.hostSecret,

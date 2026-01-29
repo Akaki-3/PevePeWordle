@@ -14,64 +14,78 @@
         <span class="dot"></span>
         <span>H2H Wordle</span>
       </div>
-      <div class="roompill" id="roomPill">No room</div>
+
+      <div class="topRight">
+        <div class="roompill" id="roomPill">No room</div>
+        <button class="iconBtn" id="menuBtn" aria-label="Menu" title="Menu">
+          ☰
+        </button>
+      </div>
     </header>
 
+    <!-- MENU DRAWER -->
+    <div class="modal menuModal" id="menuModal" hidden>
+      <div class="drawer" role="dialog" aria-modal="true">
+        <div class="drawerHead">
+          <div style="font-weight:950;">Lobby / Settings</div>
+          <button class="btn ghost mini" id="menuCloseBtn">Close</button>
+        </div>
+
+        <section class="drawerBody">
+          <div class="field">
+            <label for="name">Your name</label>
+            <input id="name" maxlength="24" placeholder="Akaki" autocomplete="nickname" />
+          </div>
+
+          <div class="actions">
+            <button class="btn" id="createBtn">Create room</button>
+
+            <div class="codeRow">
+              <input id="code" maxlength="6" placeholder="ROOM" autocapitalize="characters" />
+              <button class="btn ghost" id="joinBtn">Join</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="field">
+            <label for="mode">Mode (host)</label>
+            <select id="mode">
+              <option value="random">Random words (5 letters)</option>
+              <option value="custom">Make each other’s word (5–20 letters, any length)</option>
+            </select>
+          </div>
+
+          <div class="field two">
+            <div>
+              <label for="timer">Timer (seconds) (host)</label>
+              <input id="timer" type="number" min="30" max="600" value="120" inputmode="numeric" />
+            </div>
+
+            <div id="wordBox" style="display:none;">
+              <label for="word">Your word for opponent (5–20 letters)</label>
+              <input id="word" maxlength="20" placeholder="type up to 20…" autocapitalize="none" />
+            </div>
+          </div>
+
+          <div class="actions twoBtns">
+            <button class="btn" id="readyBtn">Set ready</button>
+            <button class="btn danger" id="startBtn" disabled>Start (host)</button>
+          </div>
+
+          <p class="hint" id="statusText">Open menu → create/join a room.</p>
+        </section>
+      </div>
+    </div>
+
     <main class="stack">
-      <section class="card lobby">
-        <div class="cardhead">
-          <h1>Lobby</h1>
-          <p class="sub">Create a room or join with a code. Host picks mode + timer.</p>
-        </div>
-
-        <div class="field">
-          <label for="name">Your name</label>
-          <input id="name" maxlength="24" placeholder="Akaki" autocomplete="nickname" />
-        </div>
-
-        <div class="actions">
-          <button class="btn" id="createBtn">Create room</button>
-          <div class="codeRow">
-            <input id="code" maxlength="6" placeholder="ROOM" autocapitalize="characters" />
-            <button class="btn ghost" id="joinBtn">Join</button>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="field">
-          <label for="mode">Mode (host)</label>
-          <select id="mode">
-            <option value="random">Random words (5 letters)</option>
-            <option value="custom">Make each other’s word (5–20 letters)</option>
-          </select>
-        </div>
-
-        <div class="field two">
-          <div>
-            <label for="timer">Timer (seconds) (host)</label>
-            <input id="timer" type="number" min="30" max="600" value="120" inputmode="numeric" />
-          </div>
-          <div id="wordBox" style="display:none;">
-            <label for="word">Your word for opponent (5–20 letters)</label>
-            <input id="word" maxlength="20" placeholder="type up to 20…" autocapitalize="none" />
-          </div>
-        </div>
-
-        <div class="actions twoBtns">
-          <button class="btn" id="readyBtn">Set ready</button>
-          <button class="btn danger" id="startBtn" disabled>Start (host)</button>
-        </div>
-
-        <p class="hint" id="statusText">Create or join a room.</p>
-      </section>
-
+      <!-- GAME ONLY -->
       <section class="card game">
         <div class="gameShell">
           <div class="gameHeader">
             <div>
               <h2>Game</h2>
-              <p class="sub" id="gameSub">Guess with the keyboard below.</p>
+              <p class="sub" id="gameSub">Open ☰ to create/join.</p>
             </div>
             <div class="timer" id="timerBox">--</div>
           </div>
@@ -84,10 +98,13 @@
             <button class="btn ghost mini" id="showScoresBtn">Scores</button>
           </div>
 
+          <div class="vsLine" id="vsLine">—</div>
+
           <div class="boardArea">
             <div class="boardWrap compact" id="youWrap">
               <div class="board" id="yourBoard"></div>
             </div>
+
             <div class="boardWrap compact" id="oppWrap" style="display:none;">
               <div class="board" id="oppBoard"></div>
             </div>
@@ -96,6 +113,8 @@
           <input id="guess" maxlength="20" style="position:absolute; left:-9999px; opacity:0;" autocapitalize="none" />
           <div class="kb" id="kb"></div>
 
+          <button class="btn ghost rematchBar" id="rematchBtn" style="display:none;">Rematch</button>
+
           <div class="modal" id="scoresModal" hidden>
             <div class="modalCard">
               <div class="modalHead">
@@ -103,7 +122,6 @@
                 <button class="btn ghost mini" id="closeScoresBtn">Close</button>
               </div>
               <div class="scoreboard" id="scoreboard"></div>
-              <button class="btn ghost" id="rematchBtn" style="display:none;">Rematch</button>
             </div>
           </div>
 
@@ -113,7 +131,11 @@
     </main>
 
     <footer class="foot">
-      <span>Baso: Magitoxar Chemi Dzma .</span>
+      <span>Tip: Use ☰ to create/join + set ready.</span>
+      <span>Magitoxar Chemi Dzma - Baso</span>
+
+
+      
     </footer>
   </div>
 
