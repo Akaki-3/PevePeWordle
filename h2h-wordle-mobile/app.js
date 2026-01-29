@@ -2,15 +2,16 @@ const $ = (id) => document.getElementById(id);
 
 const state = {
   code: null,
-  playerId: null,
+  playerId: null, // "host" | "guest"
   name: null,
   room: null,
   remaining: null,
   pollHandle: null,
-  view: "you" // you / opp
+  view: "you" // "you" | "opp"
 };
 
 let typed = "";
+let lastSig = ""; // helps reduce "blink" by avoiding pointless re-renders
 
 function toast(msg) {
   const t = $("toast");
@@ -32,33 +33,13 @@ function api(path, body) {
   });
 }
 
-function escapeHtml(s){
+function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }[c]));
 }
 
-function buildBoard(el, guesses, results, N) {
-  el.innerHTML = "";
-  for (let r = 0; r < 6; r++) {
-    const row = document.createElement("div");
-    row.className = "row5";
-    row.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
-
-    const g = guesses?.[r] || "";
-    const res = results?.[r] || [];
-
-    for (let c = 0; c < N; c++) {
-      const cell = document.createElement("div");
-      cell.className = "cell " + (res[c] || "");
-      cell.textContent = (g[c] || "");
-      row.appendChild(cell);
-    }
-    el.appendChild(row);
-  }
-}
-
-/* ======= LENGTH (per player) ======= */
+/* ===== word lengths (per player) ===== */
 function yourLen() {
   const room = state.room;
   if (!room) return 5;
@@ -73,18 +54,55 @@ function oppLen() {
   return room.wordLength || 5;
 }
 
-/* ======= Keyboard ======= */
+/* ===== Board renderer (with animations) ===== */
+function buildBoard(el, guesses, results, N, activeRowIndex = -1) {
+  el.innerHTML = "";
+
+  for (let r = 0; r < 6; r++) {
+    const row = document.createElement("div");
+    row.className = "row5" + (r === activeRowIndex ? " rowActive" : "");
+    row.style.gridTemplateColumns = `repeat(${N}, 1fr)`;
+
+    const g = guesses?.[r] || "";
+    const res = results?.[r] || [];
+
+    for (let c = 0; c < N; c++) {
+      const cell = document.createElement("div");
+
+      const ch = (g[c] || "");
+      const cls = (res[c] || ""); // "", "g", "y", "b"
+
+      cell.className = "cell " + cls + (ch ? "" : " empty");
+      cell.textContent = ch;
+
+      // typing pop
+      if (cls === "" && ch) cell.classList.add("pop");
+
+      // reveal flip (only when results exist)
+      if (cls === "g" || cls === "y" || cls === "b") {
+        cell.classList.add("reveal");
+        cell.style.animationDelay = `${c * 70}ms`;
+      }
+
+      row.appendChild(cell);
+    }
+
+    el.appendChild(row);
+  }
+}
+
+/* ===== Keyboard ===== */
 function pressKey(ch) {
   if (!state.room || state.room.status !== "running") return;
   const N = yourLen();
   if (typed.length >= N) return;
   typed += ch.toLowerCase();
-  render();
+  render(true);
 }
 function backspace() {
   if (!state.room || state.room.status !== "running") return;
   typed = typed.slice(0, -1);
-  render();
+  render(true);
 }
 async function submitTyped() {
   if (!state.room || state.room.status !== "running") return;
@@ -100,6 +118,7 @@ function buildKeyboard() {
   kb.innerHTML = "";
 
   const rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+
   const mkBtn = (label, cls, onClick) => {
     const b = document.createElement("button");
     b.className = "kbBtn " + (cls || "");
@@ -110,23 +129,26 @@ function buildKeyboard() {
 
   const r1 = document.createElement("div");
   r1.className = "kbRow";
+  r1.style.gridTemplateColumns = "repeat(10, 1fr)";
   [...rows[0]].forEach(ch => r1.appendChild(mkBtn(ch, "", () => pressKey(ch))));
-  kb.appendChild(r1);
+  $("kb").appendChild(r1);
 
   const r2 = document.createElement("div");
   r2.className = "kbRow mid";
+  r2.style.gridTemplateColumns = "repeat(9, 1fr)";
   [...rows[1]].forEach(ch => r2.appendChild(mkBtn(ch, "", () => pressKey(ch))));
-  kb.appendChild(r2);
+  $("kb").appendChild(r2);
 
   const r3 = document.createElement("div");
-  r3.className = "kbRow bot";
+  r3.className = "kbRow last";
+  r3.style.gridTemplateColumns = "1.5fr repeat(7, 1fr) 1.5fr";
   r3.appendChild(mkBtn("ENTER", "wide", () => submitTyped()));
   [...rows[2]].forEach(ch => r3.appendChild(mkBtn(ch, "", () => pressKey(ch))));
   r3.appendChild(mkBtn("⌫", "wide", () => backspace()));
-  kb.appendChild(r3);
+  $("kb").appendChild(r3);
 }
 
-/* ======= Tabs + modals ======= */
+/* ===== UI controls ===== */
 $("tabYou").addEventListener("click", () => {
   state.view = "you";
   $("tabYou").classList.add("active");
@@ -142,6 +164,12 @@ $("tabOpp").addEventListener("click", () => {
   $("youWrap").style.display = "none";
 });
 
+$("menuBtn").addEventListener("click", () => $("menuModal").hidden = false);
+$("menuCloseBtn").addEventListener("click", () => $("menuModal").hidden = true);
+$("menuModal").addEventListener("click", (e) => {
+  if (e.target === $("menuModal")) $("menuModal").hidden = true;
+});
+
 $("showScoresBtn").addEventListener("click", () => {
   if (!state.room) return toast("Open ☰ to create/join first");
   $("scoresModal").hidden = false;
@@ -151,12 +179,6 @@ $("scoresModal").addEventListener("click", (e) => {
   if (e.target === $("scoresModal")) $("scoresModal").hidden = true;
 });
 
-$("menuBtn").addEventListener("click", () => $("menuModal").hidden = false);
-$("menuCloseBtn").addEventListener("click", () => $("menuModal").hidden = true);
-$("menuModal").addEventListener("click", (e) => {
-  if (e.target === $("menuModal")) $("menuModal").hidden = true;
-});
-
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
     $("scoresModal").hidden = true;
@@ -164,7 +186,7 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
-/* ======= Poll ======= */
+/* ===== Polling ===== */
 async function poll() {
   if (!state.code) return;
   try {
@@ -173,7 +195,23 @@ async function poll() {
     if (!r.ok) throw new Error(j.error || "Poll failed");
     state.room = j.room;
     state.remaining = j.remaining;
-    render();
+
+    // reduce unnecessary re-renders (helps “blink” feeling)
+    const sig = JSON.stringify({
+      s: state.room.status,
+      h: state.room.players.host?.guesses,
+      g: state.room.players.guest?.guesses,
+      hr: state.room.players.host?.results,
+      gr: state.room.players.guest?.results,
+      rem: state.remaining,
+      mode: state.room.mode,
+      wl: state.room.wordLengths
+    });
+
+    if (sig !== lastSig) {
+      lastSig = sig;
+      render(false);
+    }
   } catch (e) {
     toast(e.message);
   }
@@ -185,8 +223,8 @@ function startPolling() {
   poll();
 }
 
-/* ======= Render ======= */
-function render() {
+/* ===== Render ===== */
+function render(fromTyping) {
   const room = state.room;
 
   $("roomPill").textContent = state.code ? `Room: ${state.code}` : "No room";
@@ -198,8 +236,8 @@ function render() {
     $("gameSub").textContent = "Open ☰ to create/join.";
     $("timerBox").textContent = "--";
     $("vsLine").textContent = "—";
-    buildBoard($("yourBoard"), [], [], 5);
-    buildBoard($("oppBoard"), [], [], 5);
+    buildBoard($("yourBoard"), [], [], 5, -1);
+    buildBoard($("oppBoard"), [], [], 5, -1);
     return;
   }
 
@@ -208,7 +246,7 @@ function render() {
   const oppId = state.playerId === "host" ? "guest" : "host";
   const opp = room.players[oppId];
 
-  // host sync UI
+  // mode controls (host only)
   $("mode").value = room.mode;
   $("timer").value = room.timerSeconds;
   $("mode").disabled = !isHost;
@@ -221,12 +259,42 @@ function render() {
   const oppName = opp?.name || "Waiting…";
   $("vsLine").textContent = `${youName} vs ${oppName}`;
 
-  // Timer
+  // timer
   const rem = (room.status === "running") ? (state.remaining ?? 0) : null;
   $("timerBox").textContent =
     room.status === "running" ? `⏱ ${rem}s`
     : room.status === "finished" ? "Finished"
     : "Lobby";
+
+  // subtitle
+  if (room.status === "running") {
+    $("gameSub").textContent = `Guess exactly ${yourLen()} letters.`;
+  } else if (room.status === "finished" && room.reveal) {
+    const yourWord = state.playerId === "host" ? room.reveal.host : room.reveal.guest;
+    const oppWord  = state.playerId === "host" ? room.reveal.guest : room.reveal.host;
+    $("gameSub").textContent =
+      `Finished. Your word: ${String(yourWord).toUpperCase()} • Opponent: ${String(oppWord).toUpperCase()}`;
+  } else {
+    $("gameSub").textContent = "Lobby: set ready in ☰.";
+  }
+
+  // Start enabled
+  const canStart =
+    isHost &&
+    room.status === "lobby" &&
+    !!room.players.guest &&
+    room.players.host.ready &&
+    room.players.guest.ready;
+
+  $("startBtn").disabled = !canStart;
+
+  // Rematch
+  if (room.status === "finished") {
+    $("rematchBtn").style.display = "block";
+    $("rematchBtn").disabled = !isHost;
+  } else {
+    $("rematchBtn").style.display = "none";
+  }
 
   // Boards (different lengths allowed)
   const Nyou = yourLen();
@@ -234,17 +302,22 @@ function render() {
 
   const youGuesses = (you?.guesses || []).slice();
   const youResults = (you?.results || []).slice();
+
+  // show typed row ONLY while running & not finished
   if (room.status === "running" && !you?.finishedAt && youGuesses.length < 6) {
     youGuesses[youGuesses.length] = typed;
     youResults[youResults.length] = Array(Nyou).fill("");
   }
 
-  buildBoard($("yourBoard"), youGuesses, youResults, Nyou);
-  buildBoard($("oppBoard"), opp?.guesses, opp?.results, Nopp);
+  const activeRow = (room.status === "running" && !you?.finishedAt) ? (you?.guesses?.length || 0) : -1;
 
-  // Scores modal content
+  // If render triggered by typing, we still rebuild (safe), but animations won’t “blink” as much due to sig check.
+  buildBoard($("yourBoard"), youGuesses, youResults, Nyou, activeRow);
+  buildBoard($("oppBoard"), opp?.guesses, opp?.results, Nopp, -1);
+
+  // Scores content
   $("scoreboard").innerHTML = "";
-  ["host","guest"].forEach((pid) => {
+  ["host", "guest"].forEach((pid) => {
     const p = room.players[pid];
     if (!p) return;
     const div = document.createElement("div");
@@ -259,40 +332,11 @@ function render() {
     `;
     $("scoreboard").appendChild(div);
   });
-
-  // Game subtitle
-  if (room.status === "running") {
-    $("gameSub").textContent = `Guess exactly ${Nyou} letters.`;
-  } else if (room.status === "finished" && room.reveal) {
-    const yourWord = state.playerId === "host" ? room.reveal.host : room.reveal.guest;
-    const oppWord  = state.playerId === "host" ? room.reveal.guest : room.reveal.host;
-    $("gameSub").textContent = `Finished. Your word: ${String(yourWord).toUpperCase()} • Opponent: ${String(oppWord).toUpperCase()}`;
-  } else {
-    $("gameSub").textContent = "Lobby: set ready in ☰.";
-  }
-
-  // Start button enable
-  const canStart =
-    isHost &&
-    room.status === "lobby" &&
-    !!room.players.guest &&
-    room.players.host.ready &&
-    room.players.guest.ready;
-
-  $("startBtn").disabled = !canStart;
-
-  // Rematch button always visible when finished (host only)
-  if (room.status === "finished") {
-    $("rematchBtn").style.display = "block";
-    $("rematchBtn").disabled = !isHost;
-  } else {
-    $("rematchBtn").style.display = "none";
-  }
 }
 
-/* ======= Host changes mode/timer ======= */
+/* ===== Host updates mode/timer ===== */
 $("mode").addEventListener("change", async () => {
-  if (!state.code || state.playerId !== "host") return render();
+  if (!state.code || state.playerId !== "host") return render(false);
   try {
     await api("/api/config", {
       code: state.code,
@@ -320,7 +364,7 @@ $("timer").addEventListener("change", async () => {
   } catch (e) { toast(e.message); }
 });
 
-/* ======= create/join ======= */
+/* ===== Create / Join ===== */
 $("createBtn").addEventListener("click", async () => {
   try {
     const name = $("name").value.trim() || "Player";
@@ -331,7 +375,7 @@ $("createBtn").addEventListener("click", async () => {
     $("code").value = state.code;
     toast(`Room created: ${state.code}`);
     typed = "";
-    $("menuModal").hidden = true; // go straight to game
+    $("menuModal").hidden = true;
     startPolling();
   } catch (e) { toast(e.message); }
 });
@@ -346,12 +390,12 @@ $("joinBtn").addEventListener("click", async () => {
     state.name = j.name;
     toast(`Joined room: ${state.code}`);
     typed = "";
-    $("menuModal").hidden = true; // go straight to game
+    $("menuModal").hidden = true;
     startPolling();
   } catch (e) { toast(e.message); }
 });
 
-/* ======= ready ======= */
+/* ===== Ready ===== */
 $("readyBtn").addEventListener("click", async () => {
   try {
     if (!state.code) return toast("Open ☰ first.");
@@ -369,11 +413,11 @@ $("readyBtn").addEventListener("click", async () => {
     state.room = j.room;
     toast("Ready set ✅");
     typed = "";
-    render();
+    render(false);
   } catch (e) { toast(e.message); }
 });
 
-/* ======= start ======= */
+/* ===== Start ===== */
 $("startBtn").addEventListener("click", async () => {
   try {
     await api("/api/start", { code: state.code, playerId: state.playerId });
@@ -384,20 +428,24 @@ $("startBtn").addEventListener("click", async () => {
   } catch (e) { toast(e.message); }
 });
 
-/* ======= guess ======= */
+/* ===== Guess ===== */
 async function submitGuess() {
   try {
     const g = $("guess").value.trim();
     if (!g) return;
-    const j = await api("/api/guess", { code: state.code, playerId: state.playerId, guess: g });
+    const j = await api("/api/guess", {
+      code: state.code,
+      playerId: state.playerId,
+      guess: g
+    });
     $("guess").value = "";
     toast(j.won ? "Solved! 🔥" : "Submitted");
     state.room = j.room;
-    render();
+    render(false);
   } catch (e) { toast(e.message); }
 }
 
-/* ======= rematch ======= */
+/* ===== Rematch ===== */
 $("rematchBtn").addEventListener("click", async () => {
   try {
     await api("/api/rematch", { code: state.code, playerId: state.playerId });
@@ -407,7 +455,7 @@ $("rematchBtn").addEventListener("click", async () => {
   } catch (e) { toast(e.message); }
 });
 
-/* physical keyboard */
+/* ===== Physical keyboard support ===== */
 window.addEventListener("keydown", (e) => {
   if (!state.room || state.room.status !== "running") return;
   if (e.key === "Enter") return submitTyped();
@@ -416,4 +464,4 @@ window.addEventListener("keydown", (e) => {
 });
 
 buildKeyboard();
-render();
+render(false);
