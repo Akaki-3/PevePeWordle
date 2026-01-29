@@ -368,3 +368,50 @@ input:focus,select:focus{border-color:rgba(91,108,255,.55);box-shadow:0 0 0 3px 
   0%{ transform: scale(.92); }
   100%{ transform: scale(1); }
 }
+/* === MOBILE WHITE KEYBOARD (iPhone style) === */
+@media (max-width: 520px){
+
+  /* keyboard container */
+  .kb{
+    position: sticky;
+    bottom: env(safe-area-inset-bottom);
+    margin-top: 10px;
+
+    background: rgba(245,246,250,.92);
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 16px;
+    padding: 10px;
+
+    backdrop-filter: blur(10px);
+    z-index: 20;
+  }
+
+  /* rows spacing */
+  .kbRow{ gap: 8px; }
+
+  /* key buttons */
+  .kbBtn{
+    height: 52px;
+    border-radius: 12px;
+
+    background: #e9edf4;
+    border: 1px solid rgba(0,0,0,.10);
+    color: #111827;
+
+    font-size: 16px;
+    font-weight: 900;
+
+    box-shadow: 0 1px 0 rgba(0,0,0,.08);
+  }
+
+  .kbBtn:active{
+    transform: translateY(1px);
+    filter: brightness(.96);
+  }
+
+  /* ENTER + backspace look bigger */
+  .kbBtn.wide{
+    font-size: 15px;
+    background: #dde3ee;
+  }
+}
