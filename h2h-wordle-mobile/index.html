@@ -17,102 +17,121 @@
 
       <div class="topRight">
         <div class="roompill" id="roomPill">No room</div>
-        <button class="iconBtn" id="menuBtn">☰</button>
+        <button class="iconBtn" id="menuBtn" aria-label="Menu" title="Menu">☰</button>
       </div>
     </header>
 
-    <!-- BURGER MENU -->
+    <!-- MENU DRAWER -->
     <div class="modal menuModal" id="menuModal" hidden>
-      <div class="drawer">
+      <div class="drawer" role="dialog" aria-modal="true">
         <div class="drawerHead">
-          <b>Lobby / Settings</b>
+          <div class="drawerTitle">Lobby / Settings</div>
           <button class="btn ghost mini" id="menuCloseBtn">Close</button>
         </div>
 
-        <div class="drawerBody">
-          <label>Your name</label>
-          <input id="name" placeholder="Akaki" />
-
-          <button class="btn" id="createBtn">Create room</button>
-
-          <div class="codeRow">
-            <input id="code" placeholder="ROOM" />
-            <button class="btn ghost" id="joinBtn">Join</button>
+        <section class="drawerBody">
+          <div class="field">
+            <label for="name">Your name</label>
+            <input id="name" maxlength="24" placeholder="Akaki" autocomplete="nickname" />
           </div>
 
-          <hr />
+          <div class="actions">
+            <button class="btn" id="createBtn">Create room</button>
 
-          <label>Mode (host)</label>
-          <select id="mode">
-            <option value="random">Random (5 letters)</option>
-            <option value="custom">Custom (5–20 letters)</option>
-          </select>
-
-          <label>Timer (host)</label>
-          <input id="timer" type="number" value="120" />
-
-          <div id="wordBox">
-            <label>Your word (custom)</label>
-            <input id="word" maxlength="20" />
+            <div class="codeRow">
+              <input id="code" maxlength="6" placeholder="ROOM" autocapitalize="characters" />
+              <button class="btn ghost" id="joinBtn">Join</button>
+            </div>
           </div>
 
-          <button class="btn" id="readyBtn">Set ready</button>
-          <button class="btn danger" id="startBtn">Start (host)</button>
+          <div class="divider"></div>
 
-          <p id="statusText"></p>
-        </div>
+          <div class="field">
+            <label for="mode">Mode (host)</label>
+            <select id="mode">
+              <option value="random">Random words (5 letters)</option>
+              <option value="custom">Make each other’s word (5–20 letters)</option>
+            </select>
+          </div>
+
+          <div class="field two">
+            <div>
+              <label for="timer">Timer (seconds) (host)</label>
+              <input id="timer" type="number" min="30" max="600" value="120" inputmode="numeric" />
+            </div>
+
+            <div id="wordBox" style="display:none;">
+              <label for="word">Your word for opponent (5–20 letters)</label>
+              <input id="word" maxlength="20" placeholder="type up to 20…" autocapitalize="none" />
+            </div>
+          </div>
+
+          <div class="actions twoBtns">
+            <button class="btn" id="readyBtn">Set ready</button>
+            <button class="btn danger" id="startBtn" disabled>Start (host)</button>
+          </div>
+
+          <p class="hint" id="statusText">Open menu → create/join a room.</p>
+        </section>
       </div>
     </div>
 
-    <!-- GAME -->
-    <main class="gameCard">
-      <div class="gameHeader">
-        <div>
-          <h2>Game</h2>
-          <p class="sub" id="gameSub">Open ☰ to start</p>
+    <main class="stack">
+      <section class="card game">
+        <div class="gameShell">
+          <div class="gameHeader">
+            <div>
+              <h2>Game</h2>
+              <p class="sub" id="gameSub">Open ☰ to create/join.</p>
+            </div>
+            <div class="timer" id="timerBox">--</div>
+          </div>
+
+          <div class="topRow">
+            <div class="seg">
+              <button class="segBtn active" id="tabYou">You</button>
+              <button class="segBtn" id="tabOpp">Opponent</button>
+            </div>
+            <button class="btn ghost mini" id="showScoresBtn">Scores</button>
+          </div>
+
+          <div class="vsLine" id="vsLine">—</div>
+
+          <div class="boardArea">
+            <div class="boardWrap compact" id="youWrap">
+              <div class="board" id="yourBoard"></div>
+            </div>
+
+            <div class="boardWrap compact" id="oppWrap" style="display:none;">
+              <div class="board" id="oppBoard"></div>
+            </div>
+          </div>
+
+          <input id="guess" maxlength="20" style="position:absolute; left:-9999px; opacity:0;" autocapitalize="none" />
+          <div class="kb" id="kb"></div>
+
+          <button class="btn ghost rematchBar" id="rematchBtn" style="display:none;">Rematch</button>
+
+          <div class="modal" id="scoresModal" hidden>
+            <div class="modalCard">
+              <div class="modalHead">
+                <div class="modalTitle">Scores</div>
+                <button class="btn ghost mini" id="closeScoresBtn">Close</button>
+              </div>
+              <div class="scoreboard" id="scoreboard"></div>
+            </div>
+          </div>
+
+          <div class="toast" id="toast" hidden></div>
         </div>
-        <div class="timer" id="timerBox">--</div>
-      </div>
-
-      <div class="topRow">
-        <div class="seg">
-          <button id="tabYou" class="segBtn active">You</button>
-          <button id="tabOpp" class="segBtn">Opponent</button>
-        </div>
-        <button class="btn ghost mini" id="showScoresBtn">Scores</button>
-      </div>
-
-      <!-- THIS WAS THE BUG -->
-      <div class="vsLine" id="vsLine">—</div>
-
-      <div class="boardArea">
-        <div id="youWrap">
-          <div class="board" id="yourBoard"></div>
-        </div>
-        <div id="oppWrap" style="display:none;">
-          <div class="board" id="oppBoard"></div>
-        </div>
-      </div>
-
-      <input id="guess" style="display:none" />
-      <div class="kb" id="kb"></div>
-
-      <button class="btn ghost rematchBar" id="rematchBtn" style="display:none;">
-        Rematch
-      </button>
+      </section>
     </main>
 
-    <div class="modal" id="scoresModal" hidden>
-      <div class="modalCard">
-        <div class="modalHead">
-          <b>Scores</b>
-          <button class="btn ghost mini" id="closeScoresBtn">Close</button>
-        </div>
-        <div id="scoreboard"></div>
-      </div>
-    </div>
-
-    <div class="toast" id="toast" hidden></div>
+    <footer class="foot">
+      <span>Tip: Use ☰ to create/join + set ready.</span>
+      <br>
+      <span>Magitoxar Chemi Dzma - Baso</span>
+    </footer>
   </div>
 
   <script src="app.js"></script>
