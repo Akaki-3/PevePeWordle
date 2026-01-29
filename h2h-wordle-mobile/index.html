@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>H2H Wordle</title>
+  <title>PVP Wordle</title>
   <meta name="theme-color" content="#0f1220" />
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -12,7 +12,7 @@
     <header class="top">
       <div class="brand">
         <span class="dot"></span>
-        <span>H2H Wordle</span>
+        <span>PVP Wordle</span>
       </div>
 
       <div class="topRight">
@@ -98,11 +98,11 @@
           <div class="vsLine" id="vsLine">—</div>
 
           <div class="boardArea">
-            <div class="boardWrap compact" id="youWrap">
+            <div class="boardWrap" id="youWrap">
               <div class="board" id="yourBoard"></div>
             </div>
 
-            <div class="boardWrap compact" id="oppWrap" style="display:none;">
+            <div class="boardWrap" id="oppWrap" style="display:none;">
               <div class="board" id="oppBoard"></div>
             </div>
           </div>
@@ -126,13 +126,12 @@
         </div>
       </section>
     </main>
-
-    <footer class="foot">
-      <span>Tip: Use ☰ to create/join + set ready.</span>
-      <br>
-      <span>Magitoxar Chemi Dzma - Baso</span>
-    </footer>
   </div>
+
+  <!-- Footer OUTSIDE .app so it can't break layout -->
+  <footer class="foot">
+    <span>Magitoxar Chemi Dzma - Baso</span>
+  </footer>
 
   <script src="app.js"></script>
 </body>

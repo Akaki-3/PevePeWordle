@@ -2,9 +2,7 @@
   --bg:#0f1220;
   --bg2:#0b0f1b;
   --card:rgba(21,26,45,.92);
-  --card2:rgba(16,20,38,.85);
   --line:rgba(255,255,255,.12);
-  --line2:rgba(255,255,255,.16);
   --text:#f4f6ff;
   --muted:rgba(244,246,255,.72);
   --muted2:rgba(244,246,255,.55);
@@ -21,9 +19,10 @@ body{
   margin:0;
   color:var(--text);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  background: radial-gradient(1200px 600px at 20% 0%, rgba(91,108,255,.18), transparent 60%),
-              radial-gradient(1000px 500px at 80% 10%, rgba(55,214,122,.10), transparent 55%),
-              linear-gradient(180deg,var(--bg),var(--bg2));
+  background:
+    radial-gradient(1200px 600px at 20% 0%, rgba(91,108,255,.18), transparent 60%),
+    radial-gradient(1000px 500px at 80% 10%, rgba(55,214,122,.10), transparent 55%),
+    linear-gradient(180deg,var(--bg),var(--bg2));
 }
 
 .app{max-width:980px;margin:0 auto;padding:14px}
@@ -141,7 +140,7 @@ h2{margin:0;font-size:28px;letter-spacing:.2px}
   font-weight:950;
   font-size:13px;
   position:relative;
-  z-index:5; /* FIX overlap */
+  z-index:5;
 }
 
 .boardArea{
@@ -157,7 +156,6 @@ h2{margin:0;font-size:28px;letter-spacing:.2px}
   gap:8px;
 }
 
-/* row container (we set columns in JS) */
 .row5{
   display:grid;
   gap:8px;
@@ -197,12 +195,23 @@ h2{margin:0;font-size:28px;letter-spacing:.2px}
 .cell.y{background:rgba(242,201,76,.22)!important;border-color:rgba(242,201,76,.55)!important}
 .cell.b{background:rgba(103,114,138,.22)!important;border-color:rgba(103,114,138,.35)!important}
 
+/* Keyboard */
 .kb{
   margin-top:12px;
   display:flex;
   flex-direction:column;
   gap:8px;
+
+  position: sticky;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  background: rgba(10,12,22,.78);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 18px;
+  padding: 10px;
+  backdrop-filter: blur(10px);
+  z-index: 10;
 }
+
 .kbRow{
   display:grid;
   grid-template-columns: repeat(10, 1fr);
@@ -214,18 +223,26 @@ h2{margin:0;font-size:28px;letter-spacing:.2px}
 .kbBtn{
   height:46px;
   border-radius:14px;
-  border:1px solid var(--line);
-  background:rgba(0,0,0,.18);
+  border: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.06);
   color:var(--text);
   font-weight:950;
   cursor:pointer;
+  text-transform:uppercase;
 }
 .kbBtn:active{transform:translateY(1px)}
 .kbBtn.wide{font-size:13px}
 
+@media (max-width: 520px){
+  .kbBtn{ height: 48px; font-size: 16px; }
+  .kbRow{ gap: 6px; }
+  .kb{ padding: 8px; }
+  .cell{ height: 44px; font-size: 18px; }
+}
+
 .rematchBar{width:100%;margin-top:10px}
 
-/* MODALS */
+/* Modals */
 .modal{
   position:fixed;inset:0;
   background:rgba(0,0,0,.45);
@@ -237,7 +254,6 @@ h2{margin:0;font-size:28px;letter-spacing:.2px}
 }
 .modal[hidden]{display:none!important}
 
-/* Drawer menu */
 .menuModal{
   align-items:stretch;
   justify-content:flex-end;
@@ -287,7 +303,6 @@ input:focus,select:focus{border-color:rgba(91,108,255,.55);box-shadow:0 0 0 3px 
 
 .hint{margin:10px 0 0;color:var(--muted2);font-weight:800;font-size:12px}
 
-/* Scores modal card */
 .modalCard{
   width:min(520px, 94vw);
   background:rgba(21,26,45,.98);
@@ -311,7 +326,6 @@ input:focus,select:focus{border-color:rgba(91,108,255,.55);box-shadow:0 0 0 3px 
 .score .name{font-weight:1000}
 .score .sub{margin-top:4px;color:var(--muted);font-size:12px;font-weight:800}
 
-/* Toast */
 .toast{
   position:fixed;
   left:50%;
@@ -325,8 +339,7 @@ input:focus,select:focus{border-color:rgba(91,108,255,.55);box-shadow:0 0 0 3px 
   z-index:1000;
 }
 
-.foot{margin-top:10px;color:var(--muted2);font-weight:800;font-size:12px;text-align:center}
-
+/* Footer quote – fixed, doesn’t block taps */
 .foot{
   position: fixed;
   bottom: 10px;
@@ -338,4 +351,20 @@ input:focus,select:focus{border-color:rgba(91,108,255,.55);box-shadow:0 0 0 3px 
   pointer-events: none;
   z-index: 2;
 }
+@media (max-width: 520px){
+  .foot{ display:none; }
+}
 
+/* Wordle animations */
+.cell.reveal{ animation: flipIn 340ms ease both; }
+@keyframes flipIn{
+  0%{ transform: rotateX(0deg); }
+  49%{ transform: rotateX(90deg); }
+  50%{ transform: rotateX(90deg); }
+  100%{ transform: rotateX(0deg); }
+}
+.cell.pop{ animation: popIn 120ms ease-out both; }
+@keyframes popIn{
+  0%{ transform: scale(.92); }
+  100%{ transform: scale(1); }
+}
