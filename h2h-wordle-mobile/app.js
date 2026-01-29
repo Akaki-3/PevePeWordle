@@ -127,7 +127,11 @@ $("tabOpp").addEventListener("click", () => {
   $("oppWrap").style.display = "block";
   $("youWrap").style.display = "none";
 });
-$("showScoresBtn").addEventListener("click", () => $("scoresModal").hidden = false);
+$("showScoresBtn").addEventListener("click", () => {
+  if (!state.room) return toast("Create or join a room first");
+  $("scoresModal").hidden = false;
+});
+
 $("closeScoresBtn").addEventListener("click", () => $("scoresModal").hidden = true);
 $("scoresModal").addEventListener("click", (e) => {
   if (e.target === $("scoresModal")) $("scoresModal").hidden = true;
@@ -378,6 +382,10 @@ window.addEventListener("keydown", (e) => {
   if (e.key === "Enter") return submitTyped();
   if (e.key === "Backspace") return backspace();
   if (/^[a-zA-Z]$/.test(e.key)) return pressKey(e.key.toUpperCase());
+}); 
+
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") $("scoresModal").hidden = true;
 });
 
 buildKeyboard();

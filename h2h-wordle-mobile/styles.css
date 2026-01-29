@@ -239,3 +239,4 @@ select{cursor:pointer}
   max-width: 92vw;
   z-index: 60;
 }
+.modal[hidden]{ display:none !important; }
