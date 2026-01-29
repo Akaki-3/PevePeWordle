@@ -203,8 +203,14 @@ h2{margin:0;font-size:28px;letter-spacing:.2px}
   flex-direction:column;
   gap:8px;
 }
-.kbRow{display:grid;gap:8px}
-.kbRow.mid{margin:0 10px}
+.kbRow{
+  display:grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap:8px;
+}
+.kbRow.mid{ grid-template-columns: repeat(9, 1fr); }
+.kbRow.last{ grid-template-columns: 1.5fr repeat(7, 1fr) 1.5fr; }
+
 .kbBtn{
   height:46px;
   border-radius:14px;
@@ -320,3 +326,16 @@ input:focus,select:focus{border-color:rgba(91,108,255,.55);box-shadow:0 0 0 3px 
 }
 
 .foot{margin-top:10px;color:var(--muted2);font-weight:800;font-size:12px;text-align:center}
+
+.foot{
+  position: fixed;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  opacity: .55;
+  pointer-events: none;
+  z-index: 2;
+}
+
