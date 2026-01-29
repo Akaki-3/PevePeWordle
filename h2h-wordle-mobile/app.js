@@ -7,7 +7,8 @@ const state = {
   room: null,
   remaining: null,
   pollHandle: null,
-  view: "you" // "you" | "opp"
+  view: "you", // "you" | "opp"
+  lastAnimatedRow: -1 // Track last animated row to prevent re-animation
 };
 
 let typed = "";
@@ -75,13 +76,27 @@ function buildBoard(el, guesses, results, N, activeRowIndex = -1) {
       cell.className = "cell " + cls + (ch ? "" : " empty");
       cell.textContent = ch;
 
-      // typing pop
-      if (cls === "" && ch) cell.classList.add("pop");
+      // typing pop (only for current typing row)
+      if (cls === "" && ch && r === activeRowIndex) {
+        cell.classList.add("pop");
+      }
 
-      // reveal flip (only when results exist)
+      // reveal flip (only on the most recently completed row, and only once)
       if (cls === "g" || cls === "y" || cls === "b") {
-        cell.classList.add("reveal");
-        cell.style.animationDelay = `${c * 70}ms`;
+        const lastCompletedRow = guesses.length - 1;
+        const shouldAnimate = r === lastCompletedRow && r > state.lastAnimatedRow;
+        
+        if (shouldAnimate) {
+          cell.classList.add("reveal");
+          cell.style.animationDelay = `${c * 70}ms`;
+          
+          // Update last animated row after animation completes
+          if (c === N - 1) {
+            setTimeout(() => {
+              state.lastAnimatedRow = r;
+            }, 70 * N + 350);
+          }
+        }
       }
 
       row.appendChild(cell);
@@ -236,6 +251,7 @@ function render(fromTyping) {
     $("gameSub").textContent = "Open ☰ to create/join.";
     $("timerBox").textContent = "--";
     $("vsLine").textContent = "—";
+    $("winnerBanner").style.display = "none";
     buildBoard($("yourBoard"), [], [], 5, -1);
     buildBoard($("oppBoard"), [], [], 5, -1);
     return;
@@ -245,6 +261,35 @@ function render(fromTyping) {
   const you = room.players[state.playerId];
   const oppId = state.playerId === "host" ? "guest" : "host";
   const opp = room.players[oppId];
+
+  // Winner banner
+  if (room.status === "finished") {
+    const hostP = room.players.host;
+    const guestP = room.players.guest;
+    
+    if (hostP && guestP) {
+      let winnerName = "";
+      let isDraw = false;
+      
+      if (hostP.score > guestP.score) {
+        winnerName = hostP.name;
+      } else if (guestP.score > hostP.score) {
+        winnerName = guestP.name;
+      } else {
+        isDraw = true;
+      }
+      
+      if (isDraw) {
+        $("winnerBanner").textContent = "🤝 IT'S A DRAW! 🤝";
+        $("winnerBanner").style.display = "block";
+      } else {
+        $("winnerBanner").textContent = `🔥 ${winnerName.toUpperCase()} WON! 🔥`;
+        $("winnerBanner").style.display = "block";
+      }
+    }
+  } else {
+    $("winnerBanner").style.display = "none";
+  }
 
   // mode controls (host only)
   $("mode").value = room.mode;
@@ -372,6 +417,7 @@ $("createBtn").addEventListener("click", async () => {
     state.code = j.code;
     state.playerId = j.playerId;
     state.name = j.name;
+    state.lastAnimatedRow = -1;
     $("code").value = state.code;
     toast(`Room created: ${state.code}`);
     typed = "";
@@ -388,6 +434,7 @@ $("joinBtn").addEventListener("click", async () => {
     state.code = j.code;
     state.playerId = j.playerId;
     state.name = j.name;
+    state.lastAnimatedRow = -1;
     toast(`Joined room: ${state.code}`);
     typed = "";
     $("menuModal").hidden = true;
@@ -421,6 +468,7 @@ $("readyBtn").addEventListener("click", async () => {
 $("startBtn").addEventListener("click", async () => {
   try {
     await api("/api/start", { code: state.code, playerId: state.playerId });
+    state.lastAnimatedRow = -1;
     toast("Started!");
     typed = "";
     $("menuModal").hidden = true;
@@ -449,6 +497,7 @@ async function submitGuess() {
 $("rematchBtn").addEventListener("click", async () => {
   try {
     await api("/api/rematch", { code: state.code, playerId: state.playerId });
+    state.lastAnimatedRow = -1;
     toast("Rematch: set ready again ✅");
     typed = "";
     poll();
