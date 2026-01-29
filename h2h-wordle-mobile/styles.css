@@ -218,28 +218,79 @@ h2 {
   z-index: 5;
 }
 
+.winnerBanner {
+  margin: 8px 0;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(91, 108, 255, 0.25), rgba(55, 214, 122, 0.25));
+  border: 2px solid rgba(91, 108, 255, 0.4);
+  border-radius: 16px;
+  text-align: center;
+  font-weight: 1000;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--text);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  animation: winnerPulse 2s ease-in-out infinite;
+}
+
+@keyframes winnerPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 4px 20px rgba(91, 108, 255, 0.3);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 6px 30px rgba(91, 108, 255, 0.5);
+  }
+}
+
 .boardArea {
   margin-top: 6px;
   position: relative;
   z-index: 1;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+.boardArea::-webkit-scrollbar {
+  height: 6px;
+}
+
+.boardArea::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.boardArea::-webkit-scrollbar-thumb {
+  background: rgba(91, 108, 255, 0.3);
+  border-radius: 3px;
+}
+
+.boardArea::-webkit-scrollbar-thumb:hover {
+  background: rgba(91, 108, 255, 0.5);
 }
 
 .boardWrap {
   padding-top: 6px;
+  min-width: min-content;
 }
 .board {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-width: min-content;
 }
 
 .row5 {
   display: grid;
   gap: 8px;
+  min-width: min-content;
 }
 
 .cell {
   height: 46px;
+  min-width: 40px;
   border-radius: 10px;
   border: 2px solid rgba(255, 255, 255, 0.14);
   background: rgba(255, 255, 255, 0.06);
@@ -329,7 +380,7 @@ h2 {
 
 @media (max-width: 520px) {
   .kbBtn {
-    height: 48px;
+    height: 44px;
     font-size: 16px;
   }
   .kbRow {
@@ -341,6 +392,18 @@ h2 {
   .cell {
     height: 44px;
     font-size: 18px;
+    min-width: 38px;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, select {
+    font-size: 16px;
+  }
+  
+  /* Smaller winner banner on mobile */
+  .winnerBanner {
+    font-size: 16px;
+    padding: 12px 16px;
   }
 }
 
@@ -531,6 +594,7 @@ select:focus {
 /* Wordle animations */
 .cell.reveal {
   animation: flipIn 340ms ease both;
+  animation-fill-mode: forwards;
 }
 @keyframes flipIn {
   0% {
@@ -548,6 +612,7 @@ select:focus {
 }
 .cell.pop {
   animation: popIn 120ms ease-out both;
+  animation-fill-mode: forwards;
 }
 @keyframes popIn {
   0% {
