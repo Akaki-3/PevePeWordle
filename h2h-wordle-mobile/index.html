@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>PVP Wordle</title>
+  <title>H2H Wordle</title>
   <meta name="theme-color" content="#0f1220" />
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -12,7 +12,7 @@
     <header class="top">
       <div class="brand">
         <span class="dot"></span>
-        <span>PVPWordle</span>
+        <span>H2H Wordle</span>
       </div>
       <div class="roompill" id="roomPill">No room</div>
     </header>
@@ -21,12 +21,12 @@
       <section class="card lobby">
         <div class="cardhead">
           <h1>Lobby</h1>
-          <p class="sub">Create a room or join with a code. Then pick a mode, ready up, and start.</p>
+          <p class="sub">Create a room or join with a code. Host picks mode + timer.</p>
         </div>
 
         <div class="field">
           <label for="name">Your name</label>
-          <input id="name" maxlength="24" placeholder="akaki :)" autocomplete="nickname" />
+          <input id="name" maxlength="24" placeholder="Akaki" autocomplete="nickname" />
         </div>
 
         <div class="actions">
@@ -40,7 +40,7 @@
         <div class="divider"></div>
 
         <div class="field">
-          <label for="mode">Mode</label>
+          <label for="mode">Mode (host)</label>
           <select id="mode">
             <option value="random">Random words (5 letters)</option>
             <option value="custom">Make each other’s word (5–20 letters)</option>
@@ -49,7 +49,7 @@
 
         <div class="field two">
           <div>
-            <label for="timer">Timer (seconds)</label>
+            <label for="timer">Timer (seconds) (host)</label>
             <input id="timer" type="number" min="30" max="600" value="120" inputmode="numeric" />
           </div>
           <div id="wordBox" style="display:none;">
@@ -67,41 +67,53 @@
       </section>
 
       <section class="card game">
-        <div class="gameTop">
-          <div>
-            <h2>Game</h2>
-            <p class="sub" id="gameSub">First to solve wins more points.</p>
-          </div>
-          <div class="timer" id="timerBox">--</div>
-        </div>
-
-        <div class="scoreboard" id="scoreboard"></div>
-
-        <div class="boards">
-          <div class="boardWrap">
-            <div class="boardTitle" id="youTitle">You</div>
-            <div class="board" id="yourBoard"></div>
+        <div class="gameShell">
+          <div class="gameHeader">
+            <div>
+              <h2>Game</h2>
+              <p class="sub" id="gameSub">Guess with the keyboard below.</p>
+            </div>
+            <div class="timer" id="timerBox">--</div>
           </div>
 
-          <div class="boardWrap">
-            <div class="boardTitle" id="oppTitle">Opponent</div>
-            <div class="board" id="oppBoard"></div>
+          <div class="topRow">
+            <div class="seg">
+              <button class="segBtn active" id="tabYou">You</button>
+              <button class="segBtn" id="tabOpp">Opponent</button>
+            </div>
+            <button class="btn ghost mini" id="showScoresBtn">Scores</button>
           </div>
+
+          <div class="boardArea">
+            <div class="boardWrap compact" id="youWrap">
+              <div class="board" id="yourBoard"></div>
+            </div>
+            <div class="boardWrap compact" id="oppWrap" style="display:none;">
+              <div class="board" id="oppBoard"></div>
+            </div>
+          </div>
+
+          <input id="guess" maxlength="20" style="position:absolute; left:-9999px; opacity:0;" autocapitalize="none" />
+          <div class="kb" id="kb"></div>
+
+          <div class="modal" id="scoresModal" hidden>
+            <div class="modalCard">
+              <div class="modalHead">
+                <div style="font-weight:900;">Scores</div>
+                <button class="btn ghost mini" id="closeScoresBtn">Close</button>
+              </div>
+              <div class="scoreboard" id="scoreboard"></div>
+              <button class="btn ghost" id="rematchBtn" style="display:none;">Rematch</button>
+            </div>
+          </div>
+
+          <div class="toast" id="toast" hidden></div>
         </div>
-
-        <div class="guessBar">
-          <input id="guess" maxlength="20" placeholder="type guess…" disabled autocapitalize="none" />
-          <button class="btn" id="guessBtn" disabled>Guess</button>
-        </div>
-
-        <button class="btn ghost" id="rematchBtn" style="display:none;">Rematch</button>
-
-        <div class="toast" id="toast" hidden></div>
       </section>
     </main>
 
     <footer class="foot">
-      <span>Tip: Gaicani vinme..... Da Magas Etamashe lol</span>
+      <span>Baso: Magitoxar Chemi Dzma .</span>
     </footer>
   </div>
 

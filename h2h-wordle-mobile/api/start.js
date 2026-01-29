@@ -1,4 +1,4 @@
-import { redis, json, roomKey } from "./_redis.js";
+import { redis, json, roomKey, publicRoom } from "./_redis.js";
 
 const WORDS5 = [
   "about","other","which","their","there","apple","spice","crane","stone","light",
@@ -28,7 +28,6 @@ export default async function handler(req, res) {
     return json(res, 409, { error: "Both players must be ready" });
   }
 
-  // choose secrets
   if (room.mode === "custom") {
     if (!room.players.host.secretForOpponent || !room.players.guest.secretForOpponent) {
       return json(res, 409, { error: "Both must set a word" });
@@ -38,16 +37,14 @@ export default async function handler(req, res) {
       return json(res, 409, { error: "Word lengths must match" });
     }
 
-    // host gave word for guest to solve; guest gave word for host to solve
-    room.random.guestSecret = room.players.host.secretForOpponent;
-    room.random.hostSecret = room.players.guest.secretForOpponent;
+    room.random.guestSecret = room.players.host.secretForOpponent; // guest solves host word
+    room.random.hostSecret = room.players.guest.secretForOpponent; // host solves guest word
   } else {
     room.wordLength = 5;
     room.random.hostSecret = pick5();
     room.random.guestSecret = pick5();
   }
 
-  // reset round state
   room.status = "running";
   room.startAt = Date.now();
 
@@ -61,12 +58,16 @@ export default async function handler(req, res) {
 
   room.lastUpdate = Date.now();
   await redis.set(key, room, { ex: 60 * 60 });
-  return json(res, 200, { ok: true });
+
+  return json(res, 200, { ok: true, room: publicRoom(room) });
 }
 
 async function readJson(req) {
   const chunks = [];
   for await (const c of req) chunks.push(c);
-  try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); }
-  catch { return {}; }
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  } catch {
+    return {};
+  }
 }

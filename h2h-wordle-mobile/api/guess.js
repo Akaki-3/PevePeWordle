@@ -1,4 +1,4 @@
-import { redis, json, roomKey, normalizeWord, isValidWordLen, evaluateGuess } from "./_redis.js";
+import { redis, json, roomKey, normalizeWord, isValidWordLen, evaluateGuess, publicRoom } from "./_redis.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return json(res, 405, { error: "POST only" });
@@ -36,13 +36,13 @@ export default async function handler(req, res) {
   if (p.guesses.length >= 6) return json(res, 409, { error: "No guesses left" });
   if (p.guesses.includes(guessRaw)) return json(res, 409, { error: "Already guessed" });
 
-  const secret = (playerId === "host") ? room.random.hostSecret : room.random.guestSecret;
+  const secret = playerId === "host" ? room.random.hostSecret : room.random.guestSecret;
   const pattern = evaluateGuess(secret, guessRaw);
 
   p.guesses.push(guessRaw);
   p.results.push(pattern);
 
-  const won = (guessRaw === secret);
+  const won = guessRaw === secret;
   if (won) {
     p.finishedAt = now;
     const guessBonus = (7 - p.guesses.length) * 10;
@@ -66,32 +66,12 @@ export default async function handler(req, res) {
   return json(res, 200, { ok: true, pattern, won, room: publicRoom(room) });
 }
 
-function publicRoom(room) {
-  const cleanPlayer = (p) => !p ? null : ({
-    id: p.id, name: p.name, ready: p.ready,
-    guesses: p.guesses, results: p.results, score: p.score, finishedAt: p.finishedAt
-  });
-
-  const out = {
-    code: room.code,
-    status: room.status,
-    mode: room.mode,
-    timerSeconds: room.timerSeconds,
-    startAt: room.startAt,
-    wordLength: room.wordLength,
-    players: { host: cleanPlayer(room.players.host), guest: cleanPlayer(room.players.guest) }
-  };
-
-  if (room.status === "finished") {
-    out.reveal = { host: room.random.hostSecret, guest: room.random.guestSecret };
-  }
-
-  return out;
-}
-
 async function readJson(req) {
   const chunks = [];
   for await (const c of req) chunks.push(c);
-  try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); }
-  catch { return {}; }
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  } catch {
+    return {};
+  }
 }

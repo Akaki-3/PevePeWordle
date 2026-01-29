@@ -16,12 +16,10 @@ export default async function handler(req, res) {
   const room = {
     code,
     createdAt: Date.now(),
-    mode: "random", // random/custom
+    mode: "random",
     status: "lobby",
     timerSeconds: 120,
     startAt: null,
-
-    // word length (custom mode can be 5..20). random mode uses 5.
     wordLength: 5,
 
     players: {
@@ -53,6 +51,9 @@ export default async function handler(req, res) {
 async function readJson(req) {
   const chunks = [];
   for await (const c of req) chunks.push(c);
-  try { return JSON.parse(Buffer.concat(chunks).toString("utf8")); }
-  catch { return {}; }
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+  } catch {
+    return {};
+  }
 }

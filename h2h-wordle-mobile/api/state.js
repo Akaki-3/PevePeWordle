@@ -1,12 +1,12 @@
-import { redis, json, roomKey } from "./_redis.js";
+import { redis, json, roomKey, publicRoom } from "./_redis.js";
 
 export default async function handler(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const code = String(url.searchParams.get("code") || "").trim().toUpperCase();
-
   if (!code) return json(res, 400, { error: "Missing code" });
 
-  const room = await redis.get(roomKey(code));
+  const key = roomKey(code);
+  const room = await redis.get(key);
   if (!room) return json(res, 404, { error: "Room not found" });
 
   let remaining = null;
@@ -16,32 +16,9 @@ export default async function handler(req, res) {
     if (remaining === 0) {
       room.status = "finished";
       room.lastUpdate = Date.now();
-      await redis.set(roomKey(code), room, { ex: 60 * 60 });
+      await redis.set(key, room, { ex: 60 * 60 });
     }
   }
 
-  const pub = publicRoom(room);
-
-  if (room.status === "finished") {
-    pub.reveal = { host: room.random.hostSecret, guest: room.random.guestSecret };
-  }
-
-  return json(res, 200, { room: pub, remaining });
-}
-
-function publicRoom(room) {
-  const cleanPlayer = (p) => !p ? null : ({
-    id: p.id, name: p.name, ready: p.ready,
-    guesses: p.guesses, results: p.results, score: p.score, finishedAt: p.finishedAt
-  });
-
-  return {
-    code: room.code,
-    status: room.status,
-    mode: room.mode,
-    timerSeconds: room.timerSeconds,
-    startAt: room.startAt,
-    wordLength: room.wordLength || 5,
-    players: { host: cleanPlayer(room.players.host), guest: cleanPlayer(room.players.guest) }
-  };
+  return json(res, 200, { room: publicRoom(room), remaining });
 }

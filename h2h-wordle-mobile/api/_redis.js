@@ -11,7 +11,6 @@ export function json(res, status, data) {
   res.end(JSON.stringify(data));
 }
 
-// normalize: keep letters only, lowercased
 export function normalizeWord(w) {
   return String(w || "")
     .trim()
@@ -34,7 +33,6 @@ export function makeCode() {
   return out;
 }
 
-// Wordle evaluation for any length N: returns array of "g","y","b"
 export function evaluateGuess(secret, guess) {
   const N = secret.length;
   const s = secret.split("");
@@ -63,4 +61,42 @@ export function evaluateGuess(secret, guess) {
   }
 
   return result;
+}
+
+export function publicRoom(room) {
+  const cleanPlayer = (p) =>
+    !p
+      ? null
+      : ({
+          id: p.id,
+          name: p.name,
+          ready: p.ready,
+          guesses: p.guesses,
+          results: p.results,
+          score: p.score,
+          finishedAt: p.finishedAt
+        });
+
+  const out = {
+    code: room.code,
+    status: room.status,
+    mode: room.mode,
+    timerSeconds: room.timerSeconds,
+    startAt: room.startAt,
+    wordLength: room.wordLength || 5,
+    players: {
+      host: cleanPlayer(room.players.host),
+      guest: cleanPlayer(room.players.guest)
+    }
+  };
+
+  // only reveal after finished
+  if (room.status === "finished") {
+    out.reveal = {
+      host: room.random.hostSecret,
+      guest: room.random.guestSecret
+    };
+  }
+
+  return out;
 }

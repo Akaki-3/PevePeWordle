@@ -1,8 +1,8 @@
 {
-  "name": "h2h-wordle",
+  "name": "h2h-wordle-mobile",
   "private": true,
   "type": "module",
   "dependencies": {
-    "@upstash/redis": "^1.34.0"
+    "@upstash/redis": "^1.31.1"
   }
 }

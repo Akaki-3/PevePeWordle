@@ -5,33 +5,37 @@ export default async function handler(req, res) {
 
   const body = await readJson(req);
   const code = String(body?.code || "").trim().toUpperCase();
-  const name = String(body?.name || "").trim().slice(0, 24) || "Player";
+  const playerId = String(body?.playerId || "");
 
   const key = roomKey(code);
   const room = await redis.get(key);
   if (!room) return json(res, 404, { error: "Room not found" });
-  if (room.status !== "lobby") return json(res, 409, { error: "Game already started" });
+  if (playerId !== "host") return json(res, 403, { error: "Only host can rematch" });
+  if (!room.players.guest) return json(res, 409, { error: "Need a guest" });
 
-  if (room.players.guest) {
-    // allow rejoin as guest (simple)
-    room.players.guest.name = name;
-  } else {
-    room.players.guest = {
-      id: "guest",
-      name,
-      ready: false,
-      secretForOpponent: null,
-      guesses: [],
-      results: [],
-      score: 0,
-      finishedAt: null
-    };
+  room.status = "lobby";
+  room.startAt = null;
+
+  room.random.hostSecret = null;
+  room.random.guestSecret = null;
+
+  for (const pid of ["host","guest"]) {
+    const p = room.players[pid];
+    if (!p) continue;
+    p.ready = false;
+    p.secretForOpponent = null;
+    p.guesses = [];
+    p.results = [];
+    p.score = 0;
+    p.finishedAt = null;
   }
+
+  if (room.mode === "random") room.wordLength = 5;
 
   room.lastUpdate = Date.now();
   await redis.set(key, room, { ex: 60 * 60 });
 
-  return json(res, 200, { code, playerId: "guest", name, room: publicRoom(room) });
+  return json(res, 200, { ok: true, room: publicRoom(room) });
 }
 
 async function readJson(req) {
