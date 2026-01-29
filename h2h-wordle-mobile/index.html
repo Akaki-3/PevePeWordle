@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
   <title>PVP Wordle</title>
   <meta name="theme-color" content="#0f1220" />
   <link rel="stylesheet" href="styles.css" />
@@ -47,7 +47,7 @@
           <div class="divider"></div>
 
           <div class="field">
-            <label for="mode">Mode (host)</label>
+            <label for="mode">Mode (host only)</label>
             <select id="mode">
               <option value="random">Random words (5 letters)</option>
               <option value="custom">Make each other’s word (5–20 letters)</option>
@@ -96,6 +96,8 @@
           </div>
 
           <div class="vsLine" id="vsLine">—</div>
+
+          <div class="winnerBanner" id="winnerBanner" style="display:none;">🔥 WINNER 🔥</div>
 
           <div class="boardArea">
             <div class="boardWrap" id="youWrap">
