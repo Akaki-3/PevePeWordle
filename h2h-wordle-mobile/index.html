@@ -3,141 +3,197 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-  <title>PVP Wordle</title>
+  <title>Wordle - Single Player</title>
   <meta name="theme-color" content="#0f1220" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="singleplayer.css" />
 </head>
 <body>
-  <div class="app">
-    <header class="top">
-      <div class="brand">
-        <span class="dot"></span>
-        <span>PVP Wordle</span>
+  <!-- MODE SELECTOR SCREEN -->
+  <div class="modeSelector" id="modeSelector">
+    <div class="modeCard">
+      <div class="logo">
+        <div class="logoDot"></div>
+        <h1>WORDLE</h1>
       </div>
-
-      <div class="topRight">
-        <a href="singleplayer.html" class="roompill" style="text-decoration: none; cursor: pointer;" title="Play Solo">
-          🎯 Solo Mode
-        </a>
-        <div class="roompill" id="roomPill">No room</div>
-        <button class="iconBtn" id="menuBtn" aria-label="Menu" title="Menu">☰</button>
+      
+      <div class="subtitle">Choose your adventure</div>
+      
+      <div class="modeButtons">
+        <button class="modeBtn daily" id="dailyModeBtn">
+          <div class="modeIcon">📅</div>
+          <div class="modeTitle">Daily Challenge</div>
+          <div class="modeDesc">One puzzle per day</div>
+        </button>
+        
+        <button class="modeBtn endless" id="endlessModeBtn">
+          <div class="modeIcon">♾️</div>
+          <div class="modeTitle">Endless Practice</div>
+          <div class="modeDesc">Unlimited gameplay</div>
+        </button>
+        
+        <button class="modeBtn pvp" id="pvpModeBtn">
+          <div class="modeIcon">⚔️</div>
+          <div class="modeTitle">Online PVP</div>
+          <div class="modeDesc">Challenge other players</div>
+        </button>
       </div>
-    </header>
-
-    <!-- MENU DRAWER -->
-    <div class="modal menuModal" id="menuModal" hidden>
-      <div class="drawer" role="dialog" aria-modal="true">
-        <div class="drawerHead">
-          <div class="drawerTitle">Lobby / Settings</div>
-          <button class="btn ghost mini" id="menuCloseBtn">Close</button>
+      
+      <div class="statsPreview" id="statsPreview">
+        <div class="statItem">
+          <div class="statValue" id="streakValue">0</div>
+          <div class="statLabel">Current Streak</div>
         </div>
-
-        <section class="drawerBody">
-          <div class="field">
-            <label for="name">Your name</label>
-            <input id="name" maxlength="24" placeholder="Akaki" autocomplete="nickname" />
-          </div>
-
-          <div class="actions">
-            <button class="btn" id="createBtn">Create room</button>
-
-            <div class="codeRow">
-              <input id="code" maxlength="6" placeholder="ROOM" autocapitalize="characters" />
-              <button class="btn ghost" id="joinBtn">Join</button>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="field">
-            <label for="mode">Mode (host only)</label>
-            <select id="mode">
-              <option value="random">Random words (5 letters)</option>
-              <option value="custom">Make each other’s word (5–20 letters)</option>
-            </select>
-          </div>
-
-          <div class="field two">
-            <div>
-              <label for="timer">Timer (seconds) (host)</label>
-              <input id="timer" type="number" min="30" max="600" value="120" inputmode="numeric" />
-            </div>
-
-            <div id="wordBox" style="display:none;">
-              <label for="word">Your word for opponent (5–20 letters)</label>
-              <input id="word" maxlength="20" placeholder="type up to 20…" autocapitalize="none" />
-            </div>
-          </div>
-
-          <div class="actions twoBtns">
-            <button class="btn" id="readyBtn">Set ready</button>
-            <button class="btn danger" id="startBtn" disabled>Start (host)</button>
-          </div>
-
-          <p class="hint" id="statusText">Open menu → create/join a room.</p>
-        </section>
+        <div class="statItem">
+          <div class="statValue" id="winRateValue">0%</div>
+          <div class="statLabel">Win Rate</div>
+        </div>
+        <div class="statItem">
+          <div class="statValue" id="gamesValue">0</div>
+          <div class="statLabel">Games Played</div>
+        </div>
       </div>
     </div>
+  </div>
 
-    <main class="stack">
-      <section class="card game">
-        <div class="gameShell">
-          <div class="gameHeader">
-            <div>
-              <h2>Game</h2>
-              <p class="sub" id="gameSub">Open ☰ to create/join.</p>
-            </div>
-            <div class="timer" id="timerBox">--</div>
-          </div>
+  <!-- GAME SCREEN -->
+  <div class="gameScreen" id="gameScreen" style="display:none;">
+    <header class="header">
+      <button class="backBtn" id="backBtn">← Back</button>
+      <div class="headerTitle">
+        <span id="gameMode">Daily Challenge</span>
+        <span id="wordLengthIndicator"></span>
+      </div>
+      <button class="statsBtn" id="statsBtn">📊</button>
+    </header>
 
-          <div class="topRow">
-            <div class="seg">
-              <button class="segBtn active" id="tabYou">You</button>
-              <button class="segBtn" id="tabOpp">Opponent</button>
-            </div>
-            <button class="btn ghost mini" id="showScoresBtn">Scores</button>
-          </div>
-
-          <div class="vsLine" id="vsLine">—</div>
-
-          <div class="winnerBanner" id="winnerBanner" style="display:none;">🔥 WINNER 🔥</div>
-
-          <div class="boardArea">
-            <div class="boardWrap" id="youWrap">
-              <div class="board" id="yourBoard"></div>
-            </div>
-
-            <div class="boardWrap" id="oppWrap" style="display:none;">
-              <div class="board" id="oppBoard"></div>
-            </div>
-          </div>
-
-          <input id="guess" maxlength="20" style="position:absolute; left:-9999px; opacity:0;" autocapitalize="none" />
-          <div class="kb" id="kb"></div>
-
-          <button class="btn ghost rematchBar" id="rematchBtn" style="display:none;">Rematch</button>
-
-          <div class="modal" id="scoresModal" hidden>
-            <div class="modalCard">
-              <div class="modalHead">
-                <div class="modalTitle">Scores</div>
-                <button class="btn ghost mini" id="closeScoresBtn">Close</button>
-              </div>
-              <div class="scoreboard" id="scoreboard"></div>
-            </div>
-          </div>
-
-          <div class="toast" id="toast" hidden></div>
+    <main class="gameContainer">
+      <div class="gameInfo">
+        <div class="streak" id="streakDisplay">
+          🔥 <span id="currentStreak">0</span> day streak
         </div>
-      </section>
+        <div class="guessCounter">
+          <span id="guessesUsed">0</span>/6 guesses
+        </div>
+      </div>
+
+      <div class="boardWrapper">
+        <div class="board" id="board"></div>
+      </div>
+
+      <div class="keyboard" id="keyboard"></div>
     </main>
   </div>
 
-  <!-- Footer OUTSIDE .app so it can't break layout -->
-  <footer class="foot">
-    <span>Magitoxar Chemi Dzma - Baso</span>
-  </footer>
+  <!-- LENGTH SELECTOR MODAL (for endless mode) -->
+  <div class="modal" id="lengthModal" hidden>
+    <div class="modalCard">
+      <h2>Choose Word Length</h2>
+      <div class="lengthButtons">
+        <button class="lengthBtn" data-length="5">5 Letters</button>
+        <button class="lengthBtn" data-length="6">6 Letters</button>
+        <button class="lengthBtn" data-length="7">7 Letters</button>
+        <button class="lengthBtn" data-length="8">8 Letters</button>
+        <button class="lengthBtn" data-length="9">9 Letters</button>
+        <button class="lengthBtn" data-length="10">10 Letters</button>
+      </div>
+    </div>
+  </div>
 
-  <script src="app.js"></script>
+  <!-- STATS MODAL -->
+  <div class="modal" id="statsModal" hidden>
+    <div class="modalCard statsCard">
+      <div class="modalHeader">
+        <h2>Statistics</h2>
+        <button class="closeBtn" id="closeStatsBtn">✕</button>
+      </div>
+      
+      <div class="statsGrid">
+        <div class="statBox">
+          <div class="statBig" id="totalGamesStats">0</div>
+          <div class="statSmall">Played</div>
+        </div>
+        <div class="statBox">
+          <div class="statBig" id="winPercentStats">0</div>
+          <div class="statSmall">Win %</div>
+        </div>
+        <div class="statBox">
+          <div class="statBig" id="currentStreakStats">0</div>
+          <div class="statSmall">Current Streak</div>
+        </div>
+        <div class="statBox">
+          <div class="statBig" id="maxStreakStats">0</div>
+          <div class="statSmall">Max Streak</div>
+        </div>
+      </div>
+
+      <div class="guessDistribution" id="guessDistribution"></div>
+
+      <button class="resetBtn" id="resetStatsBtn">Reset All Stats</button>
+    </div>
+  </div>
+
+  <!-- WIN MODAL (with definition) -->
+  <div class="modal" id="winModal" hidden>
+    <div class="modalCard winCard">
+      <div class="winHeader">
+        <div class="winEmoji">🎉</div>
+        <h2 id="winTitle">You Won!</h2>
+      </div>
+      
+      <div class="winStats">
+        <div class="winStatItem">
+          <span class="winStatLabel">Guesses:</span>
+          <span class="winStatValue" id="winGuesses">-</span>
+        </div>
+        <div class="winStatItem">
+          <span class="winStatLabel">Streak:</span>
+          <span class="winStatValue" id="winStreak">-</span>
+        </div>
+      </div>
+
+      <div class="wordReveal">
+        <div class="wordLabel">The word was:</div>
+        <div class="theWord" id="theWord">WORD</div>
+      </div>
+
+      <div class="definition" id="definitionBox">
+        <div class="defLoading">Loading definition...</div>
+      </div>
+
+      <div class="winActions">
+        <button class="playAgainBtn" id="playAgainBtn">Play Again</button>
+        <button class="shareBtn" id="shareBtn">Share Results</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOSE MODAL -->
+  <div class="modal" id="loseModal" hidden>
+    <div class="modalCard loseCard">
+      <div class="loseHeader">
+        <div class="loseEmoji">😢</div>
+        <h2>Better Luck Next Time!</h2>
+      </div>
+      
+      <div class="wordReveal">
+        <div class="wordLabel">The word was:</div>
+        <div class="theWord" id="loseWord">WORD</div>
+      </div>
+
+      <div class="definition" id="loseDefinitionBox">
+        <div class="defLoading">Loading definition...</div>
+      </div>
+
+      <div class="loseActions">
+        <button class="playAgainBtn" id="losePlayAgainBtn">Try Again</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div class="toast" id="toast" hidden></div>
+
+  <script type="module" src="wordlist.js"></script>
+  <script type="module" src="singleplayer.js"></script>
 </body>
 </html>
