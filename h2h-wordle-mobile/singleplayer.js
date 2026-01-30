@@ -72,7 +72,7 @@ function initModeSelector() {
   $('dailyModeBtn').addEventListener('click', () => startDailyMode());
   $('endlessModeBtn').addEventListener('click', () => showLengthSelector());
   $('pvpModeBtn').addEventListener('click', () => {
-    window.location.href = 'index.html';
+    window.location.href = 'singleplayer.html';
   });
 }
 
