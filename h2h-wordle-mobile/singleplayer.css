@@ -359,34 +359,37 @@ body {
   100% { transform: rotateX(0deg); }
 }
 
-.cell.correct {
+.cell.g {
   background: var(--correct);
   border-color: var(--correct);
   color: white;
 }
 
-.cell.present {
+.cell.y {
   background: var(--present);
   border-color: var(--present);
   color: white;
 }
 
-.cell.absent {
+.cell.b {
   background: var(--absent);
   border-color: var(--absent);
   color: white;
 }
 
-/* ===== KEYBOARD ===== */
+/* ===== KEYBOARD (White PVP Style) ===== */
 .keyboard {
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 16px;
-  background: rgba(31, 41, 55, 0.8);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
-  border-radius: 16px;
+  position: sticky;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  background: rgba(245, 246, 250, 0.98);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 18px;
+  backdrop-filter: blur(10px);
+  z-index: 10;
 }
 
 .keyboardRow {
@@ -399,12 +402,12 @@ body {
   flex: 1;
   min-width: 40px;
   height: 58px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--border);
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  color: var(--text-primary);
+  color: #111827;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   transition: all 0.15s ease;
   text-transform: uppercase;
@@ -414,17 +417,19 @@ body {
 }
 
 .key:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: #e5e7eb;
   transform: translateY(-2px);
 }
 
 .key:active {
-  transform: translateY(0);
+  transform: scale(0.95);
+  background: #e5e7eb;
 }
 
 .key.wide {
   flex: 1.5;
   font-size: 12px;
+  font-weight: 900;
 }
 
 .key.correct {
@@ -442,9 +447,8 @@ body {
 .key.absent {
   background: var(--absent);
   border-color: var(--absent);
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.6);
 }
-
 /* ===== MODALS ===== */
 .modal {
   position: fixed;
@@ -897,4 +901,58 @@ body {
 .modeBtn,
 .logo h1{
   background-image: none !important;
+}
+
+/* Mobile keyboard fix - white PVP style */
+@media (max-width: 640px) {
+  .keyboard {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-width: 100%;
+    background: rgba(245, 246, 250, 0.98);
+    border-radius: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    z-index: 20;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .key {
+    min-width: 0;
+    width: 100%;
+    padding: 0;
+  }
+  
+  .key.wide {
+    font-size: 11px;
+  }
+  
+  /* Add padding to bottom of game area so content isn't hidden behind fixed keyboard */
+  .gameContainer {
+    padding-bottom: 200px;
+  }
+}
+
+/* Mobile keyboard PVP style */
+@media (max-width: 640px) {
+  .keyboard {
+    position: fixed; left: 0; right: 0; bottom: 0; margin: 0;
+    padding: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    width: 100%; max-width: 100%;
+    background: rgba(245, 246, 250, 0.98);
+    border-radius: 0; border-top: 1px solid rgba(0, 0, 0, 0.1);
+    z-index: 20; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  }
+  .kbRow { gap: 4px; margin-bottom: 4px; }
+  .kbRow:last-child { margin-bottom: 0; }
+  .kbRow { grid-template-columns: repeat(10, 1fr); }
+  .kbRow.mid { grid-template-columns: 0.5fr repeat(9, 1fr) 0.5fr; }
+  .kbBtn { height: 42px; font-size: 14px; }
+  .kbBtn.wide { font-size: 11px; }
+  .gameContainer { padding-bottom: 200px; }
 }

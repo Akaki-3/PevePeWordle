@@ -8,11 +8,60 @@ const state = {
   remaining: null,
   pollHandle: null,
   view: "you", // "you" | "opp"
-  lastAnimatedRow: -1 // Track last animated row to prevent re-animation
+  lastAnimatedRow: -1, // Track last animated row to prevent re-animation
+  statsUpdated: false // Track if stats were updated for current game
 };
 
 let typed = "";
 let lastSig = ""; // helps reduce "blink" by avoiding pointless re-renders
+
+// ===== PVP STATS TRACKING =====
+const defaultStats = {
+  daily: { lastPlayed: null, currentStreak: 0, maxStreak: 0, totalGames: 0, wins: 0, guessDistribution: [0, 0, 0, 0, 0, 0] },
+  endless: { totalGames: 0, wins: 0, guessDistribution: [0, 0, 0, 0, 0, 0] },
+  pvp: { totalGames: 0, wins: 0, losses: 0, draws: 0, currentStreak: 0, maxStreak: 0 }
+};
+
+function loadStats() {
+  const saved = localStorage.getItem('wordleStats');
+  if (saved) {
+    try {
+      const stats = JSON.parse(saved);
+      // Add pvp stats if not present (backwards compatibility)
+      if (!stats.pvp) {
+        stats.pvp = { totalGames: 0, wins: 0, losses: 0, draws: 0, currentStreak: 0, maxStreak: 0 };
+      }
+      return stats;
+    } catch (e) {
+      return { ...defaultStats };
+    }
+  }
+  return { ...defaultStats };
+}
+
+function saveStats(stats) {
+  localStorage.setItem('wordleStats', JSON.stringify(stats));
+}
+
+function updatePVPStats(won, draw) {
+  const stats = loadStats();
+  stats.pvp.totalGames++;
+  
+  if (draw) {
+    stats.pvp.draws++;
+    // Draw doesn't break streak but doesn't increase it
+  } else if (won) {
+    stats.pvp.wins++;
+    stats.pvp.currentStreak++;
+    stats.pvp.maxStreak = Math.max(stats.pvp.maxStreak, stats.pvp.currentStreak);
+  } else {
+    stats.pvp.losses++;
+    stats.pvp.currentStreak = 0; // Loss resets streak
+  }
+  
+  saveStats(stats);
+  return stats;
+}
 
 function toast(msg) {
   const t = $("toast");
@@ -270,13 +319,22 @@ function render(fromTyping) {
     if (hostP && guestP) {
       let winnerName = "";
       let isDraw = false;
+      let youWon = false;
       
       if (hostP.score > guestP.score) {
         winnerName = hostP.name;
+        youWon = (state.playerId === "host");
       } else if (guestP.score > hostP.score) {
         winnerName = guestP.name;
+        youWon = (state.playerId === "guest");
       } else {
         isDraw = true;
+      }
+      
+      // Update PVP stats (only once per game)
+      if (!state.statsUpdated) {
+        updatePVPStats(youWon, isDraw);
+        state.statsUpdated = true;
       }
       
       if (isDraw) {
@@ -469,6 +527,7 @@ $("startBtn").addEventListener("click", async () => {
   try {
     await api("/api/start", { code: state.code, playerId: state.playerId });
     state.lastAnimatedRow = -1;
+    state.statsUpdated = false; // Reset stats tracking for new game
     toast("Started!");
     typed = "";
     $("menuModal").hidden = true;
@@ -498,6 +557,7 @@ $("rematchBtn").addEventListener("click", async () => {
   try {
     await api("/api/rematch", { code: state.code, playerId: state.playerId });
     state.lastAnimatedRow = -1;
+    state.statsUpdated = false; // Reset stats tracking for rematch
     toast("Rematch: set ready again ✅");
     typed = "";
     poll();

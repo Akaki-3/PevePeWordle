@@ -28,6 +28,14 @@ const defaultStats = {
     totalGames: 0,
     wins: 0,
     guessDistribution: [0, 0, 0, 0, 0, 0]
+  },
+  pvp: {
+    totalGames: 0,
+    wins: 0,
+    losses: 0,
+    draws: 0,
+    currentStreak: 0,
+    maxStreak: 0
   }
 };
 
@@ -36,7 +44,19 @@ function loadStats() {
   const saved = localStorage.getItem('wordleStats');
   if (saved) {
     try {
-      return JSON.parse(saved);
+      const stats = JSON.parse(saved);
+      // Add pvp stats if not present (backwards compatibility)
+      if (!stats.pvp) {
+        stats.pvp = {
+          totalGames: 0,
+          wins: 0,
+          losses: 0,
+          draws: 0,
+          currentStreak: 0,
+          maxStreak: 0
+        };
+      }
+      return stats;
     } catch (e) {
       return { ...defaultStats };
     }
@@ -77,10 +97,12 @@ function initModeSelector() {
 }
 
 function updateStatsPreview(stats) {
+  // Show daily streak
   $('streakValue').textContent = stats.daily.currentStreak;
   
-  const totalGames = stats.daily.totalGames + stats.endless.totalGames;
-  const totalWins = stats.daily.wins + stats.endless.wins;
+  // Calculate combined win rate (daily + endless + pvp)
+  const totalGames = stats.daily.totalGames + stats.endless.totalGames + (stats.pvp?.totalGames || 0);
+  const totalWins = stats.daily.wins + stats.endless.wins + (stats.pvp?.wins || 0);
   const winRate = totalGames > 0 ? Math.round((totalWins / totalGames) * 100) : 0;
   
   $('winRateValue').textContent = `${winRate}%`;
@@ -234,21 +256,21 @@ function renderBoard() {
 }
 
 function evaluateGuess(guess) {
-  const result = Array(state.length).fill('absent');
+  const result = Array(state.length).fill('b');
   const wordArray = state.word.split('');
   const guessArray = guess.split('');
   const used = Array(state.length).fill(false);
   
-  // First pass: mark correct letters
+  // First pass: mark correct letters (green)
   for (let i = 0; i < state.length; i++) {
     if (guessArray[i] === wordArray[i]) {
-      result[i] = 'correct';
+      result[i] = 'g';
       used[i] = true;
       guessArray[i] = null;
     }
   }
   
-  // Second pass: mark present letters
+  // Second pass: mark present letters (yellow)
   for (let i = 0; i < state.length; i++) {
     if (guessArray[i] === null) continue;
     
@@ -257,7 +279,7 @@ function evaluateGuess(guess) {
     );
     
     if (idx !== -1) {
-      result[i] = 'present';
+      result[i] = 'y';
       used[idx] = true;
     }
   }
@@ -265,37 +287,41 @@ function evaluateGuess(guess) {
   return result;
 }
 
-// ===== KEYBOARD =====
+// ===== KEYBOARD (PVP Style) =====
 function buildKeyboard() {
-  const keyboard = $('keyboard');
-  keyboard.innerHTML = '';
-  
-  const rows = [
-    ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-    ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-    ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
-  ];
-  
-  rows.forEach(rowKeys => {
-    const row = document.createElement('div');
-    row.className = 'keyboardRow';
-    
-    rowKeys.forEach(key => {
-      const button = document.createElement('button');
-      button.className = 'key';
-      button.textContent = key;
-      button.dataset.key = key;
-      
-      if (key === 'ENTER' || key === '⌫') {
-        button.classList.add('wide');
-      }
-      
-      button.addEventListener('click', () => handleKey(key));
-      row.appendChild(button);
-    });
-    
-    keyboard.appendChild(row);
-  });
+  const kb = $('keyboard');
+  kb.innerHTML = '';
+
+  const rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+
+  const mkBtn = (label, cls, onClick) => {
+    const b = document.createElement("button");
+    b.className = "kbBtn " + (cls || "");
+    b.textContent = label;
+    b.dataset.key = label;
+    b.addEventListener("click", onClick);
+    return b;
+  };
+
+  const r1 = document.createElement("div");
+  r1.className = "kbRow";
+  r1.style.gridTemplateColumns = "repeat(10, 1fr)";
+  [...rows[0]].forEach(ch => r1.appendChild(mkBtn(ch, "", () => handleKey(ch))));
+  kb.appendChild(r1);
+
+  const r2 = document.createElement("div");
+  r2.className = "kbRow mid";
+  r2.style.gridTemplateColumns = "repeat(9, 1fr)";
+  [...rows[1]].forEach(ch => r2.appendChild(mkBtn(ch, "", () => handleKey(ch))));
+  kb.appendChild(r2);
+
+  const r3 = document.createElement("div");
+  r3.className = "kbRow last";
+  r3.style.gridTemplateColumns = "1.5fr repeat(7, 1fr) 1.5fr";
+  r3.appendChild(mkBtn("ENTER", "wide", () => handleKey('ENTER')));
+  [...rows[2]].forEach(ch => r3.appendChild(mkBtn(ch, "", () => handleKey(ch))));
+  r3.appendChild(mkBtn("⌫", "wide", () => handleKey('⌫')));
+  kb.appendChild(r3);
 }
 
 function updateKeyboardColors() {
@@ -307,8 +333,8 @@ function updateKeyboardColors() {
       const letter = guess[i];
       const status = evaluation[i];
       
-      // Only update if new status is "better" (correct > present > absent)
-      const priority = { correct: 3, present: 2, absent: 1 };
+      // Only update if new status is "better" (g > y > b)
+      const priority = { g: 3, y: 2, b: 1 };
       const currentPriority = priority[state.keyboardState[letter]] || 0;
       const newPriority = priority[status];
       
@@ -318,11 +344,11 @@ function updateKeyboardColors() {
     }
   });
   
-  // Apply colors to keyboard
+  // Apply colors to keyboard buttons
   Object.keys(state.keyboardState).forEach(letter => {
     const key = document.querySelector(`[data-key="${letter}"]`);
     if (key) {
-      key.classList.remove('correct', 'present', 'absent');
+      key.classList.remove('g', 'y', 'b');
       key.classList.add(state.keyboardState[letter]);
     }
   });
@@ -523,8 +549,9 @@ async function fetchDefinition(word, containerId) {
 function showStats() {
   const stats = loadStats();
   
-  const totalGames = stats.daily.totalGames + stats.endless.totalGames;
-  const totalWins = stats.daily.wins + stats.endless.wins;
+  // Include PVP stats in totals
+  const totalGames = stats.daily.totalGames + stats.endless.totalGames + (stats.pvp?.totalGames || 0);
+  const totalWins = stats.daily.wins + stats.endless.wins + (stats.pvp?.wins || 0);
   const winPercent = totalGames > 0 ? Math.round((totalWins / totalGames) * 100) : 0;
   
   $('totalGamesStats').textContent = totalGames;
@@ -534,7 +561,7 @@ function showStats() {
   
   // Guess distribution
   const distContainer = $('guessDistribution');
-  distContainer.innerHTML = '<h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 700;">Guess Distribution</h3>';
+  distContainer.innerHTML = '<h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 700;">Solo Mode Distribution</h3>';
   
   const combined = stats.daily.guessDistribution.map((v, i) => v + stats.endless.guessDistribution[i]);
   const maxGuesses = Math.max(...combined, 1);
@@ -576,6 +603,36 @@ function showStats() {
     distContainer.appendChild(bar);
   });
   
+  // Add PVP stats section
+  if (stats.pvp && stats.pvp.totalGames > 0) {
+    distContainer.innerHTML += `
+      <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+        <h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 700;">PVP Stats</h3>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 12px;">
+          <div style="text-align: center; padding: 12px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+            <div style="font-size: 24px; font-weight: 900; color: var(--accent-primary);">${stats.pvp.wins}</div>
+            <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Wins</div>
+          </div>
+          <div style="text-align: center; padding: 12px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+            <div style="font-size: 24px; font-weight: 900; color: var(--accent-danger);">${stats.pvp.losses}</div>
+            <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Losses</div>
+          </div>
+          <div style="text-align: center; padding: 12px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+            <div style="font-size: 24px; font-weight: 900; color: var(--accent-warning);">${stats.pvp.draws}</div>
+            <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Draws</div>
+          </div>
+          <div style="text-align: center; padding: 12px; background: rgba(255, 255, 255, 0.05); border-radius: 8px;">
+            <div style="font-size: 24px; font-weight: 900; color: var(--accent-secondary);">${stats.pvp.currentStreak}</div>
+            <div style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Current Streak</div>
+          </div>
+        </div>
+        <div style="font-size: 14px; color: var(--text-muted); text-align: center;">
+          Max Streak: <span style="color: var(--accent-primary); font-weight: 900;">${stats.pvp.maxStreak}</span>
+        </div>
+      </div>
+    `;
+  }
+  
   $('statsModal').hidden = false;
 }
 
@@ -611,8 +668,8 @@ function shareResults() {
   state.guesses.forEach(guess => {
     const evaluation = evaluateGuess(guess);
     const line = evaluation.map(status => {
-      if (status === 'correct') return '🟩';
-      if (status === 'present') return '🟨';
+      if (status === 'g') return '🟩';
+      if (status === 'y') return '🟨';
       return '⬛';
     }).join('');
     text += line + '\n';
