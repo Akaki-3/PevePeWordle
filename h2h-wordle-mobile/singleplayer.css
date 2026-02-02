@@ -1049,7 +1049,7 @@ body {
     padding-bottom: calc(8px + env(safe-area-inset-bottom));
     width: 100%;
     max-width: 100%;
-    background: rgba(245, 246, 250, 0.98);
+    background: rgba(0, 4, 17, 0.98); /*dont change this color*/
     border-radius: 0;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     z-index: 20;
@@ -1127,7 +1127,7 @@ body {
     flex-shrink: 0; /* Prevent cells from shrinking */
   }
 }
-
+}
 
 /* Refresh tip message */
 .refreshTip {
@@ -1175,5 +1175,118 @@ body {
   .refreshTip {
     font-size: 11px;
     padding: 8px 12px;
+  }
+}
+
+/* Refresh banner on home screen */
+.refreshBanner {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.refreshBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.2));
+  border: 2px solid rgba(16, 185, 129, 0.4);
+  border-radius: 16px;
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.refreshBtn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent, rgba(16, 185, 129, 0.1));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.refreshBtn:hover::before {
+  opacity: 1;
+}
+
+.refreshBtn:hover {
+  border-color: var(--accent-primary);
+  transform: translateY(-4px);
+  box-shadow: 
+    0 8px 24px rgba(16, 185, 129, 0.3),
+    0 0 40px rgba(16, 185, 129, 0.2);
+}
+
+.refreshBtn:active {
+  transform: translateY(-2px);
+}
+
+.refreshBtn .refreshIcon {
+  font-size: 20px;
+  animation: refreshSpin 3s linear infinite;
+}
+
+.refreshBtn:hover .refreshIcon {
+  animation: refreshSpinFast 0.8s linear infinite;
+}
+
+@keyframes refreshSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes refreshSpinFast {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.refreshText {
+  position: relative;
+  z-index: 1;
+}
+
+/* Add pulse glow effect */
+/* @keyframes refreshGlow {
+  0%, 100% {
+    box-shadow: 
+      0 4px 12px rgba(16, 185, 129, 0.2),
+      0 0 20px rgba(16, 185, 129, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 6px 20px rgba(16, 185, 129, 0.4),
+      0 0 40px rgba(16, 185, 129, 0.2);
+  }
+} */
+
+.refreshBtn {
+  animation: refreshGlow 2s ease-in-out infinite;
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .refreshBtn {
+    padding: 14px 20px;
+    font-size: 14px;
+  }
+  
+  .refreshBtn .refreshIcon {
+    font-size: 18px;
   }
 }
