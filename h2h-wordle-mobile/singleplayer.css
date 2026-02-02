@@ -1127,7 +1127,7 @@ body {
     flex-shrink: 0; /* Prevent cells from shrinking */
   }
 }
-}
+
 
 /* Refresh tip message */
 .refreshTip {
