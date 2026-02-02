@@ -1039,7 +1039,7 @@ body {
     padding-bottom: calc(8px + env(safe-area-inset-bottom));
     width: 100%;
     max-width: 100%;
-    background: rgba(245, 246, 250, 0.98);
+    background: rgba(0, 2, 10, 0.98);
     border-radius: 0;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     z-index: 20;
