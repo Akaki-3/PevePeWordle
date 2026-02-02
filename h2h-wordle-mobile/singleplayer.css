@@ -327,7 +327,28 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 20px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.boardWrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.boardWrapper::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.boardWrapper::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.3);
+  border-radius: 3px;
+}
+
+.boardWrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5);
 }
 
 .board {
@@ -481,6 +502,25 @@ body {
   background: var(--absent);
   border-color: var(--absent);
   color: rgba(255, 255, 255, 0.6);
+}
+
+/* Keyboard color classes used by JavaScript (g=green, y=yellow, b=black/gray) */
+.key.g {
+  background: var(--correct) !important;
+  border-color: var(--correct) !important;
+  color: white !important;
+}
+
+.key.y {
+  background: var(--present) !important;
+  border-color: var(--present) !important;
+  color: white !important;
+}
+
+.key.b {
+  background: var(--absent) !important;
+  border-color: var(--absent) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 /* PVP keyboard alias styles (copied from styles.css) */
 .kb {
@@ -992,7 +1032,8 @@ body {
   background-image: none !important;
 }
 
-/* Mobile keyboard fix - white PVP style */
+
+/* Mobile keyboard fix - white PVP style with zoom prevention */
 @media (max-width: 640px) {
   .keyboard {
     position: fixed;
@@ -1011,61 +1052,71 @@ body {
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
   }
 
+  .keyboardRow {
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  .keyboardRow:last-child {
+    margin-bottom: 0;
+  }
+
   .key {
+    height: 42px;
     min-width: 0;
     width: 100%;
     padding: 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation; /* Prevent double-tap zoom */
+  }
+
+  .key:active {
+    background: #e5e7eb;
+    transform: scale(0.95);
   }
 
   .key.wide {
     font-size: 11px;
+    font-weight: 900;
   }
 
   /* Add padding to bottom of game area so content isn't hidden behind fixed keyboard */
   .gameContainer {
     padding-bottom: 200px;
   }
+
+  /* Prevent zoom on input focus */
+  input, select {
+    font-size: 16px;
+  }
+
+  /* Prevent body scroll when keyboard is visible */
+  body {
+    overflow-x: hidden;
+  }
 }
 
-/* Mobile keyboard PVP style */
+/* Better mobile board handling for longer words */
 @media (max-width: 640px) {
-  .keyboard {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    margin: 0;
-    padding: 8px;
-    padding-bottom: calc(8px + env(safe-area-inset-bottom));
-    width: 100%;
-    max-width: 100%;
-    background: rgba(0, 2, 10, 0.98);
-    border-radius: 0;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    z-index: 20;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  .boardWrapper {
+    padding: 0 10px;
   }
-  .kbRow {
-    gap: 4px;
-    margin-bottom: 4px;
+
+  .board {
+    min-width: min-content;
   }
-  .kbRow:last-child {
-    margin-bottom: 0;
+
+  .boardRow {
+    min-width: min-content;
   }
-  .kbRow {
-    grid-template-columns: repeat(10, 1fr);
-  }
-  .kbRow.mid {
-    grid-template-columns: 0.5fr repeat(9, 1fr) 0.5fr;
-  }
-  .kbBtn {
-    height: 42px;
-    font-size: 14px;
-  }
-  .kbBtn.wide {
-    font-size: 11px;
-  }
-  .gameContainer {
-    padding-bottom: 200px;
+
+  .cell {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+    flex-shrink: 0; /* Prevent cells from shrinking */
   }
 }
