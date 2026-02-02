@@ -11,7 +11,7 @@
   --text-muted: #9ca3af;
   --border: rgba(255, 255, 255, 0.1);
   --shadow: rgba(0, 0, 0, 0.5);
-  
+
   /* Wordle colors */
   --correct: #10b981;
   --present: #f59e0b;
@@ -25,7 +25,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-mid) 100%);
   color: var(--text-primary);
   min-height: 100vh;
@@ -39,9 +40,17 @@ body {
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: 
-    radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+  background:
+    radial-gradient(
+      circle at 20% 50%,
+      rgba(16, 185, 129, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(59, 130, 246, 0.1) 0%,
+      transparent 50%
+    ),
     linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-mid) 100%);
 }
 
@@ -87,15 +96,26 @@ body {
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.8; }
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
 }
 
 .logo h1 {
   font-size: 48px;
   font-weight: 900;
   letter-spacing: 4px;
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--accent-primary),
+    var(--accent-secondary)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -132,7 +152,7 @@ body {
 }
 
 .modeBtn::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, transparent, rgba(16, 185, 129, 0.1));
@@ -219,7 +239,8 @@ body {
   z-index: 100;
 }
 
-.backBtn, .statsBtn {
+.backBtn,
+.statsBtn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border);
   color: var(--text-primary);
@@ -231,7 +252,8 @@ body {
   transition: all 0.2s ease;
 }
 
-.backBtn:hover, .statsBtn:hover {
+.backBtn:hover,
+.statsBtn:hover {
   background: rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
 }
@@ -344,8 +366,13 @@ body {
 }
 
 @keyframes pop {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .cell.revealed {
@@ -354,9 +381,15 @@ body {
 }
 
 @keyframes flip {
-  0% { transform: rotateX(0deg); }
-  50% { transform: rotateX(90deg); }
-  100% { transform: rotateX(0deg); }
+  0% {
+    transform: rotateX(0deg);
+  }
+  50% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
 }
 
 .cell.g {
@@ -449,6 +482,51 @@ body {
   border-color: var(--absent);
   color: rgba(255, 255, 255, 0.6);
 }
+/* PVP keyboard alias styles (copied from styles.css) */
+.kb {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  position: sticky;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  background: rgba(10, 12, 22, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  padding: 10px;
+  backdrop-filter: blur(10px);
+  z-index: 10;
+}
+
+.kbRow {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+}
+.kbRow.mid {
+  grid-template-columns: repeat(9, 1fr);
+}
+.kbRow.last {
+  grid-template-columns: 1.5fr repeat(7, 1fr) 1.5fr;
+}
+
+.kbBtn {
+  height: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary, #f9fafb);
+  font-weight: 950;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+.kbBtn:active {
+  transform: translateY(1px);
+}
+.kbBtn.wide {
+  font-size: 13px;
+}
 /* ===== MODALS ===== */
 .modal {
   position: fixed;
@@ -468,8 +546,12 @@ body {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modalCard {
@@ -605,20 +687,27 @@ body {
 }
 
 /* Win/Lose modals */
-.winHeader, .loseHeader {
+.winHeader,
+.loseHeader {
   text-align: center;
   margin-bottom: 24px;
 }
 
-.winEmoji, .loseEmoji {
+.winEmoji,
+.loseEmoji {
   font-size: 64px;
   margin-bottom: 16px;
   animation: bounce 0.6s ease;
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 .winStats {
@@ -728,12 +817,14 @@ body {
   font-size: 14px;
 }
 
-.winActions, .loseActions {
+.winActions,
+.loseActions {
   display: flex;
   gap: 12px;
 }
 
-.playAgainBtn, .shareBtn {
+.playAgainBtn,
+.shareBtn {
   flex: 1;
   padding: 16px;
   border-radius: 12px;
@@ -807,74 +898,72 @@ body {
     height: 50px;
     font-size: 24px;
   }
-  
+
   .key {
     height: 52px;
     font-size: 14px;
   }
-  
+
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .lengthButtons {
     grid-template-columns: 1fr;
   }
-  
+
   .modeCard {
     padding: 32px 24px;
   }
-  
+
   .logo h1 {
     font-size: 36px;
   }
 }
 
-
 /* =========================
    MODE SELECTOR – FLAT ONLY
    ========================= */
 
-.modeSelector{
+.modeSelector {
   background: var(--bg);
 }
 
 /* Card */
-.modeCard{
+.modeCard {
   background: var(--card);
   border: 1px solid var(--line);
-  box-shadow: 0 18px 40px rgba(0,0,0,.45);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
   backdrop-filter: none;
 }
 
 /* Logo */
-.logoDot{
+.logoDot {
   box-shadow: none;
 }
 
-.logo h1{
+.logo h1 {
   background: none;
   -webkit-text-fill-color: initial;
   color: var(--text);
 }
 
 /* Subtitle */
-.subtitle{
+.subtitle {
   color: var(--muted);
 }
 
 /* Buttons */
-.modeBtn{
+.modeBtn {
   background: var(--panel2);
-  border: 2px solid white ;
-  
+  border: 2px solid white;
 }
 
-.modeBtn::before{
+.modeBtn::before {
   display: none;
 }
 
-.modeBtn:hover{
+.modeBtn:hover {
   background: #121a33;
   border-color: var(--line2);
   box-shadow: none;
@@ -882,16 +971,16 @@ body {
 }
 
 /* Icons */
-.modeIcon{
-  opacity: .9;
+.modeIcon {
+  opacity: 0.9;
 }
 
 /* Stats preview */
-.statsPreview{
+.statsPreview {
   border-top: 1px solid var(--line);
 }
 
-.statValue{
+.statValue {
   color: var(--accent);
 }
 
@@ -899,7 +988,7 @@ body {
 .modeSelector,
 .modeCard,
 .modeBtn,
-.logo h1{
+.logo h1 {
   background-image: none !important;
 }
 
@@ -927,11 +1016,11 @@ body {
     width: 100%;
     padding: 0;
   }
-  
+
   .key.wide {
     font-size: 11px;
   }
-  
+
   /* Add padding to bottom of game area so content isn't hidden behind fixed keyboard */
   .gameContainer {
     padding-bottom: 200px;
@@ -941,18 +1030,42 @@ body {
 /* Mobile keyboard PVP style */
 @media (max-width: 640px) {
   .keyboard {
-    position: fixed; left: 0; right: 0; bottom: 0; margin: 0;
-    padding: 8px; padding-bottom: calc(8px + env(safe-area-inset-bottom));
-    width: 100%; max-width: 100%;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 0;
+    padding: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-width: 100%;
     background: rgba(245, 246, 250, 0.98);
-    border-radius: 0; border-top: 1px solid rgba(0, 0, 0, 0.1);
-    z-index: 20; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    z-index: 20;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
   }
-  .kbRow { gap: 4px; margin-bottom: 4px; }
-  .kbRow:last-child { margin-bottom: 0; }
-  .kbRow { grid-template-columns: repeat(10, 1fr); }
-  .kbRow.mid { grid-template-columns: 0.5fr repeat(9, 1fr) 0.5fr; }
-  .kbBtn { height: 42px; font-size: 14px; }
-  .kbBtn.wide { font-size: 11px; }
-  .gameContainer { padding-bottom: 200px; }
+  .kbRow {
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  .kbRow:last-child {
+    margin-bottom: 0;
+  }
+  .kbRow {
+    grid-template-columns: repeat(10, 1fr);
+  }
+  .kbRow.mid {
+    grid-template-columns: 0.5fr repeat(9, 1fr) 0.5fr;
+  }
+  .kbBtn {
+    height: 42px;
+    font-size: 14px;
+  }
+  .kbBtn.wide {
+    font-size: 11px;
+  }
+  .gameContainer {
+    padding-bottom: 200px;
+  }
 }
