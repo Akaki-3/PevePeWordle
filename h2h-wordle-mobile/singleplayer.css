@@ -326,11 +326,12 @@ body {
   flex: 1;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* Changed from center */
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0 20px;
   -webkit-overflow-scrolling: touch;
+  scroll-padding: 20px; /* Ensure padding when scrolling */
 }
 
 .boardWrapper::-webkit-scrollbar {
@@ -356,12 +357,15 @@ body {
   flex-direction: column;
   gap: 8px;
   padding: 20px 0;
+  margin: 0 auto; /* Center the board */
+  min-width: min-content; /* Prevent shrinking */
 }
 
 .boardRow {
   display: flex;
   gap: 8px;
-  justify-content: center;
+  justify-content: flex-start; /* Changed from center */
+  min-width: min-content;
 }
 
 .cell {
@@ -1045,7 +1049,7 @@ body {
     padding-bottom: calc(8px + env(safe-area-inset-bottom));
     width: 100%;
     max-width: 100%;
-    background: rgba(0, 7, 34, 0.98);
+    background: rgba(245, 246, 250, 0.98);
     border-radius: 0;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     z-index: 20;
@@ -1102,15 +1106,18 @@ body {
 /* Better mobile board handling for longer words */
 @media (max-width: 640px) {
   .boardWrapper {
-    padding: 0 10px;
+    padding: 0 15px; /* Better padding for mobile */
+    justify-content: flex-start !important; /* Always start from left */
   }
 
   .board {
     min-width: min-content;
+    margin: 0; /* Remove auto margin on mobile */
   }
 
   .boardRow {
     min-width: min-content;
+    justify-content: flex-start !important; /* Start from left */
   }
 
   .cell {
@@ -1118,5 +1125,55 @@ body {
     height: 48px;
     font-size: 22px;
     flex-shrink: 0; /* Prevent cells from shrinking */
+  }
+}
+}
+
+/* Refresh tip message */
+.refreshTip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+  color: var(--accent-primary);
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 auto;
+  max-width: fit-content;
+  animation: pulseGlow 2s ease-in-out infinite;
+}
+
+.refreshIcon {
+  font-size: 16px;
+  animation: rotate 3s linear infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hide refresh tip on mobile to save space */
+@media (max-width: 640px) {
+  .refreshTip {
+    font-size: 11px;
+    padding: 8px 12px;
   }
 }
