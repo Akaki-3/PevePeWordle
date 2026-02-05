@@ -149,6 +149,8 @@ body {
   gap: 20px;
   position: relative;
   overflow: hidden;
+  pointer-events: auto;
+  user-select: none;
 }
 
 .modeBtn::before {
@@ -177,6 +179,7 @@ body {
 .modeIcon {
   font-size: 40px;
   flex-shrink: 0;
+  pointer-events: none;
 }
 
 .modeTitle {
@@ -184,12 +187,14 @@ body {
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 4px;
+  pointer-events: none;
 }
 
 .modeDesc {
   font-size: 14px;
   color: var(--text-muted);
   font-weight: 500;
+  pointer-events: none;
 }
 
 .statsPreview {
@@ -1289,4 +1294,253 @@ body {
   .refreshBtn .refreshIcon {
     font-size: 18px;
   }
+}
+/* ===== LANGUAGE SWITCHER ===== */
+.languageSwitcher {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+  padding: 4px;
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.langBtn {
+  flex: 1;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.langBtn:hover {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--text-primary);
+}
+
+.langBtn.active {
+  background: var(--accent-primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.langBtn:active {
+  transform: scale(0.95);
+}
+
+/* ===== PUBLIC ROOMS BROWSER ===== */
+.roomsBrowserCard {
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.roomsList {
+  flex: 1;
+  overflow-y: auto;
+  margin: 20px 0;
+  min-height: 300px;
+}
+
+.roomsLoading {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-size: 16px;
+}
+
+.roomItem {
+  background: rgba(31, 41, 55, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.roomItem:hover {
+  background: rgba(31, 41, 55, 0.9);
+  border-color: var(--accent-primary);
+  transform: translateX(4px);
+}
+
+.roomInfo {
+  flex: 1;
+}
+
+.roomName {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.roomDetails {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.roomBadge {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--accent-primary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.roomsActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.roomsActions .btn {
+  flex: 1;
+}
+
+.noRoomsMessage {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.noRoomsMessage h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+
+.noRoomsMessage p {
+  font-size: 14px;
+}
+
+/* ===== BUTTON STYLES FOR PUBLIC ROOMS ===== */
+.btn {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  background: var(--accent-primary);
+  color: white;
+}
+
+.btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.btn.ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.btn.ghost:hover {
+  background: rgba(31, 41, 55, 0.6);
+  border-color: var(--accent-primary);
+}
+
+/* ===== QUICK MATCH & BROWSE BUTTONS ===== */
+.modeBtn.quickmatch {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.modeBtn.quickmatch:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(16, 185, 129, 0.2));
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-4px);
+}
+
+.modeBtn.browse {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+.modeBtn.browse:hover {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+  border-color: rgba(139, 92, 246, 0.5);
+  transform: translateY(-4px);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  .langBtn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .roomsBrowserCard {
+    max-height: 90vh;
+  }
+  
+  .roomItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .roomsActions {
+    flex-direction: column;
+  }
+}
+
+/* ===== AD PLACEHOLDERS ===== */
+.ad-placeholder {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  margin: 12px auto;
+  max-width: 728px;
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.ad-placeholder:hover {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.ad-top {
+  margin-bottom: 16px;
+}
+
+.ad-middle {
+  margin: 20px 0;
+}
+
+.ad-bottom {
+  margin-top: 16px;
+  margin-bottom: 20px;
 }

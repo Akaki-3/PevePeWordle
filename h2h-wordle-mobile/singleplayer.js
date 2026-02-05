@@ -86,6 +86,7 @@ function toast(message, duration = 2000) {
 
 // ===== MODE SELECTION =====
 function initModeSelector() {
+  console.log('initModeSelector called!');
   const stats = loadStats();
   updateStatsPreview(stats);
 
@@ -94,6 +95,26 @@ function initModeSelector() {
   $("pvpModeBtn").addEventListener("click", () => {
     window.location.href = "singleplayer.html";
   });
+  
+  // Quick Match button
+  const quickMatchBtn = $("quickMatchBtn");
+  console.log('Quick Match button element:', quickMatchBtn);
+  if (quickMatchBtn) {
+    quickMatchBtn.addEventListener("click", handleQuickMatch);
+    console.log('Quick Match click listener attached!');
+  } else {
+    console.error('Quick Match button not found!');
+  }
+  
+  // Browse Rooms button
+  const browseRoomsBtn = $("browseRoomsBtn");
+  console.log('Browse Rooms button element:', browseRoomsBtn);
+  if (browseRoomsBtn) {
+    browseRoomsBtn.addEventListener("click", showPublicRoomsBrowser);
+    console.log('Browse Rooms click listener attached!');
+  } else {
+    console.error('Browse Rooms button not found!');
+  }
 }
 
 function updateStatsPreview(stats) {
@@ -728,9 +749,17 @@ function shareResults() {
 }
 
 // ===== INITIALIZATION =====
-document.addEventListener("DOMContentLoaded", () => {
+function init() {
   initModeSelector();
-});
+}
+
+// Handle both cases: DOM already loaded or still loading
+if (document.readyState === 'loading') {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  // DOM already loaded, run immediately
+  init();
+}
 
 // Add shake animation to CSS dynamically
 const style = document.createElement("style");
@@ -742,3 +771,118 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// ========================================
+// PUBLIC ROOMS & QUICK MATCH FUNCTIONALITY
+// ========================================
+
+async function handleQuickMatch() {
+  console.log('Quick Match button clicked!');
+  const name = localStorage.getItem('playerName') || 'Player';
+  toast(t('lookingForMatch') || 'Looking for a match...', 3000);
+  
+  try {
+    const response = await fetch('/api/quickMatch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+    
+    const data = await response.json();
+    
+    if (data.code) {
+      const action = data.created ? 'created' : 'joined';
+      toast(`${t(action === 'created' ? 'roomCreated' : 'joinedRoom')} ${data.code}`, 2000);
+      
+      // Redirect to PVP page with room code
+      setTimeout(() => {
+        window.location.href = `singleplayer.html?room=${data.code}`;
+      }, 1000);
+    }
+  } catch (error) {
+    console.error('Quick match error:', error);
+    toast(t('error') || 'Failed to find match', 2000);
+  }
+}
+
+function showPublicRoomsBrowser() {
+  console.log('Browse Rooms button clicked!');
+  const modal = $('roomsBrowserModal');
+  modal.hidden = false;
+  loadPublicRooms();
+  
+  // Close button
+  $('closeRoomsBtn').addEventListener('click', () => {
+    modal.hidden = true;
+  });
+  
+  // Refresh button
+  $('refreshRoomsBtn').addEventListener('click', () => {
+    loadPublicRooms();
+  });
+  
+  // Create public room button
+  $('createPublicRoomBtn').addEventListener('click', () => {
+    modal.hidden = true;
+    window.location.href = 'singleplayer.html?createPublic=true';
+  });
+}
+
+async function loadPublicRooms() {
+  const roomsList = $('roomsList');
+  roomsList.innerHTML = `<div class="roomsLoading">${t('loading')}</div>`;
+  
+  try {
+    const response = await fetch('/api/listPublicRooms');
+    const data = await response.json();
+    
+    if (data.rooms && data.rooms.length > 0) {
+      roomsList.innerHTML = data.rooms.map(room => `
+        <div class="roomItem" onclick="joinPublicRoom('${room.code}')">
+          <div class="roomInfo">
+            <div class="roomName">${t('host')}: ${escapeHtml(room.hostName)}</div>
+            <div class="roomDetails">
+              <span class="roomBadge">${t('mode')}: ${room.mode === 'random' ? t('randomWords') : t('customWords')}</span>
+              <span>${t('timer')}: ${room.timerSeconds || 120}${t('seconds')}</span>
+              <span>${room.wordLength || 5} ${t('letters')}</span>
+            </div>
+          </div>
+          <button class="btn">${t('joinRoom')}</button>
+        </div>
+      `).join('');
+    } else {
+      roomsList.innerHTML = `
+        <div class="noRoomsMessage">
+          <h3>${t('noRooms')}</h3>
+          <p>${t('noRoomsDesc')}</p>
+        </div>
+      `;
+    }
+  } catch (error) {
+    console.error('Error loading public rooms:', error);
+    roomsList.innerHTML = `<div class="roomsLoading">${t('error') || 'Failed to load rooms'}</div>`;
+  }
+}
+
+function joinPublicRoom(code) {
+  const name = localStorage.getItem('playerName') || 'Player';
+  toast(`${t('joinedRoom')} ${code}`, 2000);
+  setTimeout(() => {
+    window.location.href = `singleplayer.html?room=${code}&name=${encodeURIComponent(name)}`;
+  }, 1000);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Translation helper function (t)
+function t(key) {
+  if (typeof translations !== 'undefined' && typeof getCurrentLanguage === 'function') {
+    const lang = getCurrentLanguage();
+    return translations[lang]?.[key] || key;
+  }
+  return key;
+}

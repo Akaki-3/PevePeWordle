@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="ka">
 <head>
   <meta charset="utf-8" />
   <link rel="icon" type="image/png" href="icon.png" />
@@ -7,26 +7,30 @@
   <link rel="apple-touch-icon" href="icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="PVP Wordle" />
+  <meta name="apple-mobile-web-app-title" data-i18n="pvpWordle" content="PVP სიტყვური" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-  <title>PVP Wordle</title>
+  <title data-i18n="pvpWordle">PVP სიტყვური</title>
   <meta name="theme-color" content="#0f1220" />
   <link rel="stylesheet" href="styles.css" />
 </head>
-<!-- index.html -->
 <body>
+  <!-- AD PLACEHOLDER TOP (hidden by default) -->
+  <div class="ad-placeholder ad-top" id="adTop" style="display: none;">
+    <span data-i18n="advertisement">რეკლამა</span>
+  </div>
+
   <div class="app">
     <header class="top">
       <div class="brand">
         <span class="dot"></span>
-        <span>PVP Wordle</span>
+        <span data-i18n="pvpWordle">PVP სიტყვური</span>
       </div>
 
       <div class="topRight">
         <a href="index.html" class="roompill" style="text-decoration: none; cursor: pointer;" title="Play Solo">
-          🎯 Solo Mode
+          <span data-i18n="soloMode">🎯 სოლო რეჟიმი</span>
         </a>
-        <div class="roompill" id="roomPill">No room</div>
+        <div class="roompill" id="roomPill" data-i18n="noRoom">ოთახი არ არის</div>
         <button class="iconBtn" id="menuBtn" aria-label="Menu" title="Menu">☰</button>
       </div>
     </header>
@@ -35,79 +39,90 @@
     <div class="modal menuModal" id="menuModal" hidden>
       <div class="drawer" role="dialog" aria-modal="true">
         <div class="drawerHead">
-          <div class="drawerTitle">Lobby / Settings</div>
-          <button class="btn ghost mini" id="menuCloseBtn">Close</button>
+          <div class="drawerTitle" data-i18n="lobbySettings">ლობი / პარამეტრები</div>
+          <button class="btn ghost mini" id="menuCloseBtn" data-i18n="close">დახურვა</button>
         </div>
 
         <section class="drawerBody">
           <div class="field">
-            <label for="name">Your name</label>
-            <input id="name" maxlength="24" placeholder="Akaki" autocomplete="nickname" />
+            <label for="name" data-i18n="yourName">შენი სახელი</label>
+            <input id="name" maxlength="24" placeholder="გიორგი" autocomplete="nickname" data-i18n-placeholder="namePlaceholder" />
           </div>
 
           <div class="actions">
-            <button class="btn" id="createBtn">Create room</button>
+            <button class="btn" id="createBtn" data-i18n="createPrivateRoom">კერძო ოთახის შექმნა</button>
 
             <div class="codeRow">
-              <input id="code" maxlength="6" placeholder="ROOM" autocapitalize="characters" />
-              <button class="btn ghost" id="joinBtn">Join</button>
+              <label for="code" style="display: none;" data-i18n="roomCode">ოთახის კოდი</label>
+              <input id="code" maxlength="6" placeholder="კოდი" autocapitalize="characters" data-i18n-placeholder="codePlaceholder" />
+              <button class="btn ghost" id="joinBtn" data-i18n="join">შესვლა</button>
             </div>
           </div>
 
           <div class="divider"></div>
 
           <div class="field">
-            <label for="mode">Mode (host only)</label>
+            <label for="mode" data-i18n="modeLabel">რეჟიმი (მასპინძელი)</label>
             <select id="mode">
-              <option value="random">Random words (5 letters)</option>
-              <option value="custom">Make each other’s word (5–20 letters)</option>
+              <option value="random" data-i18n="randomWords">შემთხვევითი სიტყვები (5 ასო)</option>
+              <option value="custom" data-i18n="customWords">ერთმანეთის სიტყვები (5–20 ასო)</option>
             </select>
           </div>
 
           <div class="field two">
             <div>
-              <label for="timer">Timer (seconds) (host)</label>
+              <label for="timer" data-i18n="timerLabel">ტაიმერი (წამები) (მასპინძელი)</label>
               <input id="timer" type="number" min="30" max="600" value="120" inputmode="numeric" />
             </div>
 
             <div id="wordBox" style="display:none;">
-              <label for="word">Your word for opponent (5–20 letters)</label>
-              <input id="word" maxlength="20" placeholder="type up to 20…" autocapitalize="none" />
+              <label for="word" data-i18n="yourWord">შენი სიტყვა მოწინააღმდეგისთვის (5–20 ასო)</label>
+              <input id="word" maxlength="20" placeholder="შეიყვანე სიტყვა..." autocapitalize="none" data-i18n-placeholder="wordPlaceholder" />
             </div>
           </div>
 
+          <label class="checkbox" style="margin: 12px 0;">
+            <input type="checkbox" id="publicRoomCheckbox" />
+            <span data-i18n="publicRoom">საჯარო ოთახი (ყველას ხელმისაწვდომი)</span>
+          </label>
+
           <div class="actions twoBtns">
-            <button class="btn" id="readyBtn">Set ready</button>
-            <button class="btn danger" id="startBtn" disabled>Start (host)</button>
+            <button class="btn" id="readyBtn" data-i18n="setReady">მზად ვარ</button>
+            <button class="btn danger" id="startBtn" disabled data-i18n="startHost">დაწყება (მასპინძელი)</button>
           </div>
 
-          <p class="hint" id="statusText">Open menu → create/join a room.</p>
+          <p class="hint" id="statusText" data-i18n="statusText">გახსენი ☰ ოთახის შესაქმნელად.</p>
         </section>
       </div>
     </div>
 
     <main class="stack">
+      <!-- AD PLACEHOLDER MIDDLE (hidden by default) -->
+      <div class="ad-placeholder ad-middle" id="adMiddle" style="display: none;">
+        <span data-i18n="advertisement">რეკლამა</span>
+      </div>
+
       <section class="card game">
         <div class="gameShell">
           <div class="gameHeader">
             <div>
-              <h2>Game</h2>
-              <p class="sub" id="gameSub">Open ☰ to create/join.</p>
+              <h2 data-i18n="game">თამაში</h2>
+              <p class="sub" id="gameSub" data-i18n="gameSub">გახსენი ☰ ოთახის შესაქმნელად.</p>
             </div>
             <div class="timer" id="timerBox">--</div>
           </div>
 
           <div class="topRow">
             <div class="seg">
-              <button class="segBtn active" id="tabYou">You</button>
-              <button class="segBtn" id="tabOpp">Opponent</button>
+              <button class="segBtn active" id="tabYou" data-i18n="you">შენ</button>
+              <button class="segBtn" id="tabOpp" data-i18n="opponent">მოწინააღმდეგე</button>
             </div>
-            <button class="btn ghost mini" id="showScoresBtn">Scores</button>
+            <button class="btn ghost mini" id="showScoresBtn" data-i18n="scores">ქულები</button>
           </div>
 
           <div class="vsLine" id="vsLine">—</div>
 
-          <div class="winnerBanner" id="winnerBanner" style="display:none;">🔥 WINNER 🔥</div>
+          <div class="winnerBanner" id="winnerBanner" style="display:none;" data-i18n="winner">🔥 გამარჯვებული 🔥</div>
 
           <div class="boardArea">
             <div class="boardWrap" id="youWrap">
@@ -122,13 +137,13 @@
           <input id="guess" maxlength="20" style="position:absolute; left:-9999px; opacity:0;" autocapitalize="none" />
           <div class="kb" id="kb"></div>
 
-          <button class="btn ghost rematchBar" id="rematchBtn" style="display:none;">Rematch</button>
+          <button class="btn ghost rematchBar" id="rematchBtn" style="display:none;" data-i18n="rematch">რევანში</button>
 
           <div class="modal" id="scoresModal" hidden>
             <div class="modalCard">
               <div class="modalHead">
-                <div class="modalTitle">Scores</div>
-                <button class="btn ghost mini" id="closeScoresBtn">Close</button>
+                <div class="modalTitle" data-i18n="scores">ქულები</div>
+                <button class="btn ghost mini" id="closeScoresBtn" data-i18n="close">დახურვა</button>
               </div>
               <div class="scoreboard" id="scoreboard"></div>
             </div>
@@ -140,11 +155,43 @@
     </main>
   </div>
 
+  <!-- AD PLACEHOLDER BOTTOM (hidden by default) -->
+  <div class="ad-placeholder ad-bottom" id="adBottom" style="display: none;">
+    <span data-i18n="advertisement">რეკლამა</span>
+  </div>
+
   <!-- Footer OUTSIDE .app so it can't break layout -->
   <footer class="foot">
     <span>Magitoxar Chemi Dzma - Baso</span>
   </footer>
 
+  <script src="translations.js"></script>
   <script src="app.js"></script>
+  <script>
+    // Apply translations on load
+    document.addEventListener('DOMContentLoaded', () => {
+      updateAllTexts();
+      
+      // Update placeholders
+      document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        const key = el.getAttribute('data-i18n-placeholder');
+        el.placeholder = t(key);
+      });
+
+      // Update select options
+      document.querySelectorAll('select option[data-i18n]').forEach(option => {
+        const key = option.getAttribute('data-i18n');
+        option.textContent = t(key);
+      });
+    });
+
+    // Ad visibility toggle (for testing)
+    window.toggleAds = function(show) {
+      ['adTop', 'adMiddle', 'adBottom'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = show ? 'flex' : 'none';
+      });
+    };
+  </script>
 </body>
 </html>
