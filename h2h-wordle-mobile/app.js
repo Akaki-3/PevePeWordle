@@ -1,6 +1,10 @@
+/* app js */
 const $ = (id) => document.getElementById(id);
 
 const state = {
+  lastReadyHost: null,
+  lastReadyGuest: null,
+
   code: null,
   playerId: null, // "host" | "guest"
   name: null,
@@ -46,19 +50,18 @@ function saveStats(stats) {
 function updatePVPStats(won, draw) {
   const stats = loadStats();
   stats.pvp.totalGames++;
-  
+
   if (draw) {
     stats.pvp.draws++;
-    // Draw doesn't break streak but doesn't increase it
   } else if (won) {
     stats.pvp.wins++;
     stats.pvp.currentStreak++;
     stats.pvp.maxStreak = Math.max(stats.pvp.maxStreak, stats.pvp.currentStreak);
   } else {
     stats.pvp.losses++;
-    stats.pvp.currentStreak = 0; // Loss resets streak
+    stats.pvp.currentStreak = 0;
   }
-  
+
   saveStats(stats);
   return stats;
 }
@@ -87,6 +90,17 @@ function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }[c]));
+}
+
+/* ===== language pill ===== */
+function currentLang() {
+  return (typeof getCurrentLanguage === "function") ? getCurrentLanguage() : "en";
+}
+function updateLangPill() {
+  const el = $("langPill");
+  if (!el) return;
+  const lang = currentLang();
+  el.textContent = lang === "ka" ? "KA · ქართული" : "EN · English";
 }
 
 /* ===== word lengths (per player) ===== */
@@ -134,12 +148,11 @@ function buildBoard(el, guesses, results, N, activeRowIndex = -1) {
       if (cls === "g" || cls === "y" || cls === "b") {
         const lastCompletedRow = guesses.length - 1;
         const shouldAnimate = r === lastCompletedRow && r > state.lastAnimatedRow;
-        
+
         if (shouldAnimate) {
           cell.classList.add("reveal");
           cell.style.animationDelay = `${c * 70}ms`;
-          
-          // Update last animated row after animation completes
+
           if (c === N - 1) {
             setTimeout(() => {
               state.lastAnimatedRow = r;
@@ -160,7 +173,7 @@ function pressKey(ch) {
   if (!state.room || state.room.status !== "running") return;
   const N = yourLen();
   if (typed.length >= N) return;
-  typed += ch.toLowerCase();
+  typed += String(ch).toLowerCase();
   render(true);
 }
 function backspace() {
@@ -177,11 +190,19 @@ async function submitTyped() {
   await submitGuess();
 }
 
+function getKeyboardRows() {
+  const lang = currentLang();
+  if (lang === "ka") {
+    return ["ქწერტყუიოპ", "ასდფგჰჯკლ", "ზხცვბნმ"];
+  }
+  return ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+}
+
 function buildKeyboard() {
   const kb = $("kb");
   kb.innerHTML = "";
 
-  const rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+  const rows = getKeyboardRows();
 
   const mkBtn = (label, cls, onClick) => {
     const b = document.createElement("button");
@@ -195,13 +216,13 @@ function buildKeyboard() {
   r1.className = "kbRow";
   r1.style.gridTemplateColumns = "repeat(10, 1fr)";
   [...rows[0]].forEach(ch => r1.appendChild(mkBtn(ch, "", () => pressKey(ch))));
-  $("kb").appendChild(r1);
+  kb.appendChild(r1);
 
   const r2 = document.createElement("div");
   r2.className = "kbRow mid";
   r2.style.gridTemplateColumns = "repeat(9, 1fr)";
   [...rows[1]].forEach(ch => r2.appendChild(mkBtn(ch, "", () => pressKey(ch))));
-  $("kb").appendChild(r2);
+  kb.appendChild(r2);
 
   const r3 = document.createElement("div");
   r3.className = "kbRow last";
@@ -209,7 +230,7 @@ function buildKeyboard() {
   r3.appendChild(mkBtn("ENTER", "wide", () => submitTyped()));
   [...rows[2]].forEach(ch => r3.appendChild(mkBtn(ch, "", () => pressKey(ch))));
   r3.appendChild(mkBtn("⌫", "wide", () => backspace()));
-  $("kb").appendChild(r3);
+  kb.appendChild(r3);
 }
 
 /* ===== UI controls ===== */
@@ -260,7 +281,20 @@ async function poll() {
     state.room = j.room;
     state.remaining = j.remaining;
 
-    // reduce unnecessary re-renders (helps “blink” feeling)
+    // ✅ readiness toasts
+    const rh = !!state.room?.players?.host?.ready;
+    const rg = !!state.room?.players?.guest?.ready;
+
+    if (state.lastReadyHost !== null && state.lastReadyHost !== rh) {
+      toast(rh ? "✅ Host is ready" : "❌ Host not ready");
+    }
+    if (state.lastReadyGuest !== null && state.lastReadyGuest !== rg) {
+      toast(rg ? "✅ Guest is ready" : "❌ Guest not ready");
+    }
+
+    state.lastReadyHost = rh;
+    state.lastReadyGuest = rg;
+
     const sig = JSON.stringify({
       s: state.room.status,
       h: state.room.players.host?.guesses,
@@ -292,6 +326,7 @@ function render(fromTyping) {
   const room = state.room;
 
   $("roomPill").textContent = state.code ? `Room: ${state.code}` : "No room";
+  updateLangPill();
 
   if (!room) {
     $("statusText").textContent = "Open ☰ → create/join a room.";
@@ -315,12 +350,12 @@ function render(fromTyping) {
   if (room.status === "finished") {
     const hostP = room.players.host;
     const guestP = room.players.guest;
-    
+
     if (hostP && guestP) {
       let winnerName = "";
       let isDraw = false;
       let youWon = false;
-      
+
       if (hostP.score > guestP.score) {
         winnerName = hostP.name;
         youWon = (state.playerId === "host");
@@ -330,13 +365,12 @@ function render(fromTyping) {
       } else {
         isDraw = true;
       }
-      
-      // Update PVP stats (only once per game)
+
       if (!state.statsUpdated) {
         updatePVPStats(youWon, isDraw);
         state.statsUpdated = true;
       }
-      
+
       if (isDraw) {
         $("winnerBanner").textContent = "🤝 IT'S A DRAW! 🤝";
         $("winnerBanner").style.display = "block";
@@ -347,6 +381,14 @@ function render(fromTyping) {
     }
   } else {
     $("winnerBanner").style.display = "none";
+  }
+
+  // ✅ Always show boards once running (fix “host closes / guest not”)
+  if (room.status === "running") {
+    $("youWrap").style.display = "block";
+    $("oppWrap").style.display = "none";
+    $("tabYou").classList.add("active");
+    $("tabOpp").classList.remove("active");
   }
 
   // mode controls (host only)
@@ -399,14 +441,13 @@ function render(fromTyping) {
     $("rematchBtn").style.display = "none";
   }
 
-  // Boards (different lengths allowed)
+  // Boards
   const Nyou = yourLen();
   const Nopp = oppLen();
 
   const youGuesses = (you?.guesses || []).slice();
   const youResults = (you?.results || []).slice();
 
-  // show typed row ONLY while running & not finished
   if (room.status === "running" && !you?.finishedAt && youGuesses.length < 6) {
     youGuesses[youGuesses.length] = typed;
     youResults[youResults.length] = Array(Nyou).fill("");
@@ -414,7 +455,6 @@ function render(fromTyping) {
 
   const activeRow = (room.status === "running" && !you?.finishedAt) ? (you?.guesses?.length || 0) : -1;
 
-  // If render triggered by typing, we still rebuild (safe), but animations won’t “blink” as much due to sig check.
   buildBoard($("yourBoard"), youGuesses, youResults, Nyou, activeRow);
   buildBoard($("oppBoard"), opp?.guesses, opp?.results, Nopp, -1);
 
@@ -471,7 +511,11 @@ $("timer").addEventListener("change", async () => {
 $("createBtn").addEventListener("click", async () => {
   try {
     const name = $("name").value.trim() || "Player";
-    const j = await api("/api/create", { name });
+
+    // ✅ NEW: public room checkbox
+    const isPublic = $("publicRoomCheckbox") ? $("publicRoomCheckbox").checked : false;
+
+    const j = await api("/api/create", { name, isPublic });
     state.code = j.code;
     state.playerId = j.playerId;
     state.name = j.name;
@@ -527,7 +571,7 @@ $("startBtn").addEventListener("click", async () => {
   try {
     await api("/api/start", { code: state.code, playerId: state.playerId });
     state.lastAnimatedRow = -1;
-    state.statsUpdated = false; // Reset stats tracking for new game
+    state.statsUpdated = false;
     toast("Started!");
     typed = "";
     $("menuModal").hidden = true;
@@ -557,7 +601,7 @@ $("rematchBtn").addEventListener("click", async () => {
   try {
     await api("/api/rematch", { code: state.code, playerId: state.playerId });
     state.lastAnimatedRow = -1;
-    state.statsUpdated = false; // Reset stats tracking for rematch
+    state.statsUpdated = false;
     toast("Rematch: set ready again ✅");
     typed = "";
     poll();
@@ -569,8 +613,60 @@ window.addEventListener("keydown", (e) => {
   if (!state.room || state.room.status !== "running") return;
   if (e.key === "Enter") return submitTyped();
   if (e.key === "Backspace") return backspace();
+
+  // EN letters only (on-screen keyboard handles KA)
   if (/^[a-zA-Z]$/.test(e.key)) return pressKey(e.key.toUpperCase());
 });
 
+function qs(name) {
+  return new URL(location.href).searchParams.get(name);
+}
+
+// ✅ NEW: auto connect from URL (?code=&pid=&name=) + legacy (?room=)
+async function autoConnectFromUrl() {
+  const codeFromNew = qs("code");
+  const pidFromNew  = qs("pid");
+  const nameFromNew = qs("name");
+
+  const legacyRoom = qs("room"); // old param support
+  const legacyName = qs("name");
+
+  const code = (codeFromNew || legacyRoom || "").trim().toUpperCase();
+  const pid  = (pidFromNew || (legacyRoom ? "guest" : "")).trim();
+  const name = (nameFromNew || legacyName || "").trim();
+
+  if (!code) return;
+
+  $("code").value = code;
+  if (name) $("name").value = name;
+
+  try {
+    if (pid === "guest" || legacyRoom) {
+      const j = await api("/api/join", { code, name: $("name").value.trim() || "Player" });
+      state.code = j.code;
+      state.playerId = j.playerId;
+      state.name = j.name;
+    } else if (pid === "host") {
+      state.code = code;
+      state.playerId = "host";
+      state.name = $("name").value.trim() || "Player";
+    } else {
+      // if pid missing, default guest join
+      const j = await api("/api/join", { code, name: $("name").value.trim() || "Player" });
+      state.code = j.code;
+      state.playerId = j.playerId;
+      state.name = j.name;
+    }
+
+    state.lastAnimatedRow = -1;
+    state.statsUpdated = false;
+    $("menuModal").hidden = true;
+    startPolling();
+  } catch (e) {
+    toast(e.message);
+  }
+}
+
 buildKeyboard();
 render(false);
+autoConnectFromUrl();

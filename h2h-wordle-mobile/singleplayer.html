@@ -30,6 +30,10 @@
         <a href="index.html" class="roompill" style="text-decoration: none; cursor: pointer;" title="Play Solo">
           <span data-i18n="soloMode">🎯 სოლო რეჟიმი</span>
         </a>
+
+        <!-- ✅ NEW: LANGUAGE INDICATOR -->
+        <div class="roompill" id="langPill">KA</div>
+
         <div class="roompill" id="roomPill" data-i18n="noRoom">ოთახი არ არის</div>
         <button class="iconBtn" id="menuBtn" aria-label="Menu" title="Menu">☰</button>
       </div>
@@ -46,7 +50,7 @@
         <section class="drawerBody">
           <div class="field">
             <label for="name" data-i18n="yourName">შენი სახელი</label>
-            <input id="name" maxlength="24" placeholder="გიორგი" autocomplete="nickname" data-i18n-placeholder="namePlaceholder" />
+            <input id="name" maxlength="24" placeholder="აკაკი" autocomplete="nickname" data-i18n-placeholder="namePlaceholder" />
           </div>
 
           <div class="actions">
@@ -171,7 +175,7 @@
     // Apply translations on load
     document.addEventListener('DOMContentLoaded', () => {
       updateAllTexts();
-      
+
       // Update placeholders
       document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         const key = el.getAttribute('data-i18n-placeholder');
