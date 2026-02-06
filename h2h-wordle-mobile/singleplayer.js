@@ -3,7 +3,6 @@ import { getDailyWord, getRandomWord, isValidWord } from "./wordlist.js";
 const $ = (id) => document.getElementById(id);
 
 function pvpUrl(code, pid, name) {
-  // ✅ PVP გვერდი არის singleplayer.html (სადაც app.js იტვირთება)
   const url = new URL("singleplayer.html", window.location.origin);
   url.searchParams.set("code", code);
   url.searchParams.set("pid", pid);
@@ -20,7 +19,7 @@ const state = {
   currentGuess: "",
   gameOver: false,
   won: false,
-  keyboardState: {},
+  keyboardState: {}, // Track letter states for keyboard coloring
 };
 
 // Stats structure
@@ -54,10 +53,17 @@ function loadStats() {
     try {
       const stats = JSON.parse(saved);
       if (!stats.pvp) {
-        stats.pvp = { ...defaultStats.pvp };
+        stats.pvp = {
+          totalGames: 0,
+          wins: 0,
+          losses: 0,
+          draws: 0,
+          currentStreak: 0,
+          maxStreak: 0,
+        };
       }
       return stats;
-    } catch {
+    } catch (e) {
       return { ...defaultStats };
     }
   }
@@ -83,30 +89,46 @@ function toast(message, duration = 2000) {
 
 // ===== MODE SELECTION =====
 function initModeSelector() {
+  console.log("initModeSelector called!");
   const stats = loadStats();
   updateStatsPreview(stats);
 
   $("dailyModeBtn").addEventListener("click", () => startDailyMode());
   $("endlessModeBtn").addEventListener("click", () => showLengthSelector());
   $("pvpModeBtn").addEventListener("click", () => {
-    // გადადის PVP page-ზე
     window.location.href = "singleplayer.html";
   });
 
   const quickMatchBtn = $("quickMatchBtn");
-  if (quickMatchBtn) quickMatchBtn.addEventListener("click", handleQuickMatch);
+  console.log("Quick Match button element:", quickMatchBtn);
+  if (quickMatchBtn) {
+    quickMatchBtn.addEventListener("click", handleQuickMatch);
+    console.log("Quick Match click listener attached!");
+  } else {
+    console.error("Quick Match button not found!");
+  }
 
   const browseRoomsBtn = $("browseRoomsBtn");
-  if (browseRoomsBtn) browseRoomsBtn.addEventListener("click", showPublicRoomsBrowser);
+  console.log("Browse Rooms button element:", browseRoomsBtn);
+  if (browseRoomsBtn) {
+    browseRoomsBtn.addEventListener("click", showPublicRoomsBrowser);
+    console.log("Browse Rooms click listener attached!");
+  } else {
+    console.error("Browse Rooms button not found!");
+  }
 }
 
 function updateStatsPreview(stats) {
   $("streakValue").textContent = stats.daily.currentStreak;
 
   const totalGames =
-    stats.daily.totalGames + stats.endless.totalGames + (stats.pvp?.totalGames || 0);
-  const totalWins = stats.daily.wins + stats.endless.wins + (stats.pvp?.wins || 0);
-  const winRate = totalGames > 0 ? Math.round((totalWins / totalGames) * 100) : 0;
+    stats.daily.totalGames +
+    stats.endless.totalGames +
+    (stats.pvp?.totalGames || 0);
+  const totalWins =
+    stats.daily.wins + stats.endless.wins + (stats.pvp?.wins || 0);
+  const winRate =
+    totalGames > 0 ? Math.round((totalWins / totalGames) * 100) : 0;
 
   $("winRateValue").textContent = `${winRate}%`;
   $("gamesValue").textContent = totalGames;
@@ -132,9 +154,10 @@ function startDailyMode() {
 function showLengthSelector() {
   $("lengthModal").hidden = false;
 
-  document.querySelectorAll(".lengthBtn").forEach((btn) => {
+  const buttons = document.querySelectorAll(".lengthBtn");
+  buttons.forEach((btn) => {
     btn.addEventListener("click", () => {
-      const length = parseInt(btn.dataset.length, 10);
+      const length = parseInt(btn.dataset.length);
       startEndlessMode(length);
       $("lengthModal").hidden = true;
     });
@@ -160,13 +183,15 @@ function initGame() {
   $("gameScreen").style.display = "flex";
 
   const stats = loadStats();
-  $("gameMode").textContent = state.mode === "daily" ? "Daily Challenge" : "Endless Practice";
+  $("gameMode").textContent =
+    state.mode === "daily" ? "Daily Challenge" : "Endless Practice";
   $("wordLengthIndicator").textContent = `${state.length} letters`;
   $("currentStreak").textContent = stats.daily.currentStreak;
   updateGuessCounter();
 
   buildBoard();
   buildKeyboard();
+
   setupEventListeners();
 }
 
@@ -187,7 +212,8 @@ function backToMenu() {
   $("modeSelector").style.display = "flex";
   document.removeEventListener("keydown", handleKeyPress);
 
-  updateStatsPreview(loadStats());
+  const stats = loadStats();
+  updateStatsPreview(stats);
 }
 
 function updateGuessCounter() {
@@ -318,7 +344,9 @@ function updateKeyboardColors() {
       const currentPriority = priority[state.keyboardState[letter]] || 0;
       const newPriority = priority[status];
 
-      if (newPriority > currentPriority) state.keyboardState[letter] = status;
+      if (newPriority > currentPriority) {
+        state.keyboardState[letter] = status;
+      }
     }
   });
 
@@ -331,7 +359,7 @@ function updateKeyboardColors() {
   });
 }
 
-// ===== INPUT =====
+// ===== INPUT HANDLING =====
 function handleKeyPress(e) {
   if (state.gameOver) return;
 
@@ -387,10 +415,12 @@ function submitGuess() {
 function shakeRow(rowIndex) {
   const row = $(`row-${rowIndex}`);
   row.style.animation = "shake 0.5s";
-  setTimeout(() => (row.style.animation = ""), 500);
+  setTimeout(() => {
+    row.style.animation = "";
+  }, 500);
 }
 
-// ===== END =====
+// ===== GAME END =====
 function handleWin() {
   const stats = loadStats();
   const guessCount = state.guesses.length;
@@ -422,6 +452,7 @@ function handleWin() {
   $("theWord").textContent = state.word;
 
   fetchDefinition(state.word, "definitionBox");
+
   $("winModal").hidden = false;
   toast("🎉 Congratulations! 🎉", 3000);
 }
@@ -441,10 +472,11 @@ function handleLose() {
 
   $("loseWord").textContent = state.word;
   fetchDefinition(state.word, "loseDefinitionBox");
+
   $("loseModal").hidden = false;
 }
 
-// ===== DEFINITION =====
+// ===== DEFINITION API =====
 async function fetchDefinition(word, containerId) {
   const container = $(containerId);
   container.innerHTML = '<div class="defLoading">Loading definition...</div>';
@@ -460,12 +492,13 @@ async function fetchDefinition(word, containerId) {
     html += `<div class="defWord">${entry.word}</div>`;
     if (entry.phonetic) html += `<div class="defPronunciation">${entry.phonetic}</div>`;
 
-    if (entry.meanings?.length) {
+    if (entry.meanings && entry.meanings.length > 0) {
       const meaning = entry.meanings[0];
       html += '<div class="defMeaning">';
       html += `<span class="defPartOfSpeech">${meaning.partOfSpeech}</span>`;
-      const def = meaning.definitions?.[0];
-      if (def?.definition) {
+
+      if (meaning.definitions && meaning.definitions.length > 0) {
+        const def = meaning.definitions[0];
         html += `<div class="defDefinition">${def.definition}</div>`;
         if (def.example) html += `<div class="defExample">"${def.example}"</div>`;
       }
@@ -474,7 +507,7 @@ async function fetchDefinition(word, containerId) {
 
     html += "</div>";
     container.innerHTML = html;
-  } catch {
+  } catch (error) {
     container.innerHTML = `
       <div class="defContent">
         <div class="defDefinition">Definition not available for this word.</div>
@@ -488,7 +521,9 @@ function showStats() {
   const stats = loadStats();
 
   const totalGames =
-    stats.daily.totalGames + stats.endless.totalGames + (stats.pvp?.totalGames || 0);
+    stats.daily.totalGames +
+    stats.endless.totalGames +
+    (stats.pvp?.totalGames || 0);
   const totalWins = stats.daily.wins + stats.endless.wins + (stats.pvp?.wins || 0);
   const winPercent = totalGames > 0 ? Math.round((totalWins / totalGames) * 100) : 0;
 
@@ -517,8 +552,8 @@ function showStats() {
     barFill.style.cssText = `
       flex:1;height:24px;background:var(--accent-primary);
       border-radius:4px;display:flex;align-items:center;justify-content:flex-end;
-      padding:0 8px;font-weight:700;font-size:14px;width:${Math.max(width, 5)}%;
-      min-width:24px;transition:width .3s ease;
+      padding:0 8px;font-weight:700;font-size:14px;
+      width:${Math.max(width, 5)}%;min-width:24px;transition:width .3s ease;
     `;
     barFill.textContent = count;
 
@@ -526,6 +561,35 @@ function showStats() {
     bar.appendChild(barFill);
     distContainer.appendChild(bar);
   });
+
+  if (stats.pvp && stats.pvp.totalGames > 0) {
+    distContainer.innerHTML += `
+      <div style="margin-top:24px;padding-top:24px;border-top:1px solid var(--border);">
+        <h3 style="margin-bottom:16px;font-size:18px;font-weight:700;">PVP Stats</h3>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px;">
+          <div style="text-align:center;padding:12px;background:rgba(255,255,255,.05);border-radius:8px;">
+            <div style="font-size:24px;font-weight:900;color:var(--accent-primary);">${stats.pvp.wins}</div>
+            <div style="font-size:12px;color:var(--text-muted);font-weight:600;">Wins</div>
+          </div>
+          <div style="text-align:center;padding:12px;background:rgba(255,255,255,.05);border-radius:8px;">
+            <div style="font-size:24px;font-weight:900;color:var(--accent-danger);">${stats.pvp.losses}</div>
+            <div style="font-size:12px;color:var(--text-muted);font-weight:600;">Losses</div>
+          </div>
+          <div style="text-align:center;padding:12px;background:rgba(255,255,255,.05);border-radius:8px;">
+            <div style="font-size:24px;font-weight:900;color:var(--accent-warning);">${stats.pvp.draws}</div>
+            <div style="font-size:12px;color:var(--text-muted);font-weight:600;">Draws</div>
+          </div>
+          <div style="text-align:center;padding:12px;background:rgba(255,255,255,.05);border-radius:8px;">
+            <div style="font-size:24px;font-weight:900;color:var(--accent-secondary);">${stats.pvp.currentStreak}</div>
+            <div style="font-size:12px;color:var(--text-muted);font-weight:600;">Current Streak</div>
+          </div>
+        </div>
+        <div style="font-size:14px;color:var(--text-muted);text-align:center;">
+          Max Streak: <span style="color:var(--accent-primary);font-weight:900;">${stats.pvp.maxStreak}</span>
+        </div>
+      </div>
+    `;
+  }
 
   $("statsModal").hidden = false;
 }
@@ -539,7 +603,6 @@ function resetStats() {
   }
 }
 
-// ===== PLAY AGAIN =====
 function playAgain() {
   $("winModal").hidden = true;
   $("loseModal").hidden = true;
@@ -552,14 +615,16 @@ function playAgain() {
   }
 }
 
-// ===== SHARE RESULTS =====
 function shareResults() {
   const guessCount = state.won ? state.guesses.length : "X";
   let text = `Wordle ${state.mode === "daily" ? "Daily" : "Endless"} ${guessCount}/6\n\n`;
 
   state.guesses.forEach((guess) => {
     const evaluation = evaluateGuess(guess);
-    text += evaluation.map((s) => (s === "g" ? "🟩" : s === "y" ? "🟨" : "⬛")).join("") + "\n";
+    const line = evaluation
+      .map((status) => (status === "g" ? "🟩" : status === "y" ? "🟨" : "⬛"))
+      .join("");
+    text += line + "\n";
   });
 
   navigator.clipboard.writeText(text).then(
@@ -568,10 +633,33 @@ function shareResults() {
   );
 }
 
+// ===== INITIALIZATION =====
+function init() {
+  initModeSelector();
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+
+// shake animation
+const style = document.createElement("style");
+style.textContent = `
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  }
+`;
+document.head.appendChild(style);
+
 // ========================================
-// PUBLIC ROOMS & QUICK MATCH
+// PUBLIC ROOMS & QUICK MATCH FUNCTIONALITY
 // ========================================
 async function handleQuickMatch() {
+  console.log("Quick Match button clicked!");
   const name = localStorage.getItem("playerName") || "Player";
   toast(t("lookingForMatch") || "Looking for a match...", 3000);
 
@@ -599,6 +687,7 @@ async function handleQuickMatch() {
 }
 
 function showPublicRoomsBrowser() {
+  console.log("Browse Rooms button clicked!");
   const modal = $("roomsBrowserModal");
   modal.hidden = false;
   loadPublicRooms();
@@ -619,7 +708,7 @@ async function loadPublicRooms() {
     const response = await fetch("/api/listPublicRooms");
     const data = await response.json();
 
-    if (data.rooms?.length) {
+    if (data.rooms && data.rooms.length > 0) {
       roomsList.innerHTML = data.rooms
         .map(
           (room) => `
@@ -658,10 +747,10 @@ function joinPublicRoom(code) {
   toast(`${t("joinedRoom")} ${code}`, 2000);
 
   setTimeout(() => {
-    // ეს მიდის PVP გვერდზე
-    window.location.href = pvpUrl(code, "guest", name);
+    window.location.href = `singleplayer.html?room=${code}&name=${encodeURIComponent(name)}`;
   }, 1000);
 }
+
 window.joinPublicRoom = joinPublicRoom;
 
 function escapeHtml(text) {
@@ -670,7 +759,6 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// Translation helper
 function t(key) {
   if (typeof translations !== "undefined" && typeof getCurrentLanguage === "function") {
     const lang = getCurrentLanguage();
@@ -678,25 +766,3 @@ function t(key) {
   }
   return key;
 }
-
-// ===== INITIALIZATION (ერთხელ მხოლოდ) =====
-function init() {
-  initModeSelector();
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
-
-// shake animation
-const style = document.createElement("style");
-style.textContent = `
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-    20%, 40%, 60%, 80% { transform: translateX(5px); }
-  }
-`;
-document.head.appendChild(style);
