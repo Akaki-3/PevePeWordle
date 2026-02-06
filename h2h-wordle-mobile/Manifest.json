@@ -1,6 +1,6 @@
 {
-  "name": "PVP Wordl",
-  "short_name": "PVP Wordl",
+  "name": "PVP Wordle",
+  "short_name": "PVP Wordle",
   "description": "Epic PVP Wordle battles with fire and ice!",
   "start_url": "/",
   "display": "standalone",
