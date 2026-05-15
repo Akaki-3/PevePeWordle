@@ -81,41 +81,45 @@ export default async function handler(req, res) {
           });
         }
         
-        // Return fallback in Georgian - always show something meaningful
+        // Return fallback - always show something
         const commonGeorgianWords = {
-          "სახლი": { def: "საცხოვრებელი შენობა, სადაც ადამიანები ცხოვრობენ", pos: "არსებითი სახელი" },
-          "წყალი": { def: "გამჭვირვალე, უფერო სითხე, სიცოცხლისთვის აუცილებელი", pos: "არსებითი სახელი" },
-          "თვალი": { def: "მხედველობის ორგანო", pos: "არსებითი სახელი" },
-          "წიგნი": { def: "ბეჭდური ან ხელნაწერი გვერდების კრებული", pos: "არსებითი სახელი" },
-          "სკოლა": { def: "სასწავლებელი, სადაც ბავშვები განათლებას იღებენ", pos: "არსებითი სახელი" },
-          "კვირა": { def: "შვიდი დღის პერიოდი; ასევე კვირის ბოლო დღე", pos: "არსებითი სახელი" },
-          "თოვლი": { def: "თეთრი ნალექი, ზამთარში ჩამოყრილი", pos: "არსებითი სახელი" },
-          "წვიმა": { def: "ღრუბლებიდან ჩამოვარდნილი წყლის წვეთები", pos: "არსებითი სახელი" },
-          "ყველი": { def: "რძისგან დამზადებული საკვები პროდუქტი", pos: "არსებითი სახელი" },
-          "ფიქრი": { def: "გონებრივი მოქმედება, მსჯელობა", pos: "არსებითი სახელი" },
-          "ოჯახი": { def: "ერთად მცხოვრები ახლობელი ადამიანების ჯგუფი", pos: "არსებითი სახელი" },
-          "ექიმი": { def: "მედიცინის სპეციალისტი, ავადმყოფებს მკურნალობს", pos: "არსებითი სახელი" },
-          "ტაქსი": { def: "ქირაობის ავტომობილი, მძღოლით", pos: "არსებითი სახელი" },
-          "პარკი": { def: "ხეებით, სკამებით მოწყობილი საჯარო სივრცე", pos: "არსებითი სახელი" },
-          "ბებია": { def: "მამის ან დედის დედა", pos: "არსებითი სახელი" },
-          "ბაბუა": { def: "მამის ან დედის მამა", pos: "არსებითი სახელი" },
-          "მეტრო": { def: "მიწისქვეშა ელექტრული მატარებელი ქალაქში", pos: "არსებითი სახელი" },
-          "ქიმია": { def: "მეცნიერება ნივთიერებათა შემადგენლობის შესახებ", pos: "არსებითი სახელი" },
-          "ვაშლი": { def: "მრგვალი, წითელი ან მწვანე ხილი", pos: "არსებითი სახელი" },
-          "ღვინო": { def: "ყურძნის წვენისგან დამზადებული ალკოჰოლური სასმელი", pos: "არსებითი სახელი" },
-          "ცხენი": { def: "ოთხფეხა ძუძუმწოვარი ცხოველი", pos: "არსებითი სახელი" },
-          "ძაღლი": { def: "შინაური ოთხფეხა ცხოველი, კაცის მეგობარი", pos: "არსებითი სახელი" },
-          "ქვიშა": { def: "წვრილი მინერალური მარცვლები, სანაპიროზე გხვდება", pos: "არსებითი სახელი" },
-          "სველი": { def: "წყლით ან სხვა სითხით გაჟღენთილი", pos: "ზედსართავი სახელი" },
+          "სახლი": "a building where people live, home",
+          "პური": "food made from grain, bread",
+          "წყალი": "clear liquid essential for life, water",
+          "ღამე": "the dark period between sunset and sunrise, night",
+          "დილა": "early morning, before sunrise",
+          "ქალაქ": "a large town or city",
+          "კარი": "a movable barrier that blocks an opening, door",
+          "თავი": "the upper part of the body containing the brain",
+          "გული": "the organ that pumps blood, heart",
+          "თვალი": "the organ of sight, eye",
+          "ყური": "the organ of hearing, ear",
+          "ხელი": "the part of the arm beyond the wrist, hand",
+          "ფეხი": "the part of the leg below the ankle, foot",
+          "დედა": "a female parent, mother",
+          "მამა": "a male parent, father",
+          "ბიჭი": "a male child, boy",
+          "ქალი": "an adult female person, woman",
+          "კაცი": "an adult male person, man",
+          "გზა": "a route for travel, road",
+          "ფული": "a medium of exchange for goods, money",
+          "დრო": "the indefinite continued progress of existence, time",
+          "დღე": "the period of light between sunrise and sunset, day",
+          "ცა": "the space above the earth, sky",
+          "მთა": "a high landform, mountain",
+          "ზღვა": "a large body of salt water, sea",
+          "ტყე": "an area covered with trees, forest",
+          "მიწა": "the solid surface of the earth, ground"
         };
         
-        const entry = commonGeorgianWords[word] || commonGeorgianWords[word.toLowerCase()];
+        // Try lowercase version
+        const fallbackDef = commonGeorgianWords[word] || commonGeorgianWords[word.toLowerCase()] || `Georgian word with ${word.length} letters`;
         
         return res.status(200).json({
           success: true,
           word: word,
-          definition: entry ? entry.def : `ქართული სიტყვა (${word.length} ასო)`,
-          partOfSpeech: entry ? entry.pos : 'სახელი',
+          definition: fallbackDef,
+          partOfSpeech: 'სახელი',
           example: null,
           source: 'Fallback'
         });

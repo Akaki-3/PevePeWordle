@@ -58,6 +58,25 @@ const translations = {
     // PVP
     pvpWordle: "PVP Wordle",
     soloMode: "🎯 Solo Mode",
+    // Auth
+    login: "Sign In",
+    register: "Create Account",
+    authTagline: "Sign in to save your progress",
+    email: "Email",
+    emailPlaceholder: "you@example.com",
+    password: "Password",
+    displayName: "Display Name",
+    signIn: "Sign In",
+    createAccount: "Create Account",
+    orContinueAs: "or continue as",
+    guestNamePlaceholder: "Guest name (optional)",
+    playAsGuest: "⚡ Play as Guest",
+    editProfile: "✏️ Edit Profile",
+    signOut: "🚪 Sign Out",
+    user: "User",
+    saveChanges: "Save Changes",
+    guest: "Guest",
+    registeredUser: "Member",
     noRoom: "No room",
     menu: "Menu",
     lobbySettings: "Lobby / Settings",
@@ -103,10 +122,28 @@ const translations = {
     // Refresh
     refreshText: "Refresh For The Best Experience",
     
-    // Language
+// Language
     language: "Language",
     georgian: "ქართული",
-    english: "English"
+    english: "English",
+
+    // Definitions
+    definition: "Definition",
+    definitionNotFound: "Definition not available for this word.",
+    partOfSpeech: "Part of Speech",
+    example: "Example",
+
+    // Auth
+    login: "Login",
+    register: "Register",
+    logout: "Logout",
+    guest: "Guest",
+    email: "Email",
+    password: "Password",
+    sendCode: "Send Code",
+    verifyCode: "Verify",
+    enterCode: "Enter code",
+    playAsGuest: "Play as Guest"
   },
   
   ka: {
@@ -167,6 +204,25 @@ const translations = {
     // PVP
     pvpWordle: "PVP სიტყვური",
     soloMode: "🎯 სოლო რეჟიმი",
+    // Auth
+    login: "შესვლა",
+    register: "რეგისტრაცია",
+    authTagline: "შედი პროგრესის შესანახად",
+    email: "ელ-ფოსტა",
+    emailPlaceholder: "you@example.com",
+    password: "პაროლი",
+    displayName: "სახელი",
+    signIn: "შესვლა",
+    createAccount: "ანგარიშის შექმნა",
+    orContinueAs: "ან გააგრძელე როგორც",
+    guestNamePlaceholder: "სახელი (სურვილისამებრ)",
+    playAsGuest: "⚡ სტუმრად თამაში",
+    editProfile: "✏️ პროფილის რედაქტირება",
+    signOut: "🚪 გამოსვლა",
+    user: "მომხმარებელი",
+    saveChanges: "შენახვა",
+    guest: "სტუმარი",
+    registeredUser: "წევრი",
     noRoom: "ოთახი არ არის",
     menu: "მენიუ",
     lobbySettings: "ლობი / პარამეტრები",
@@ -215,7 +271,13 @@ const translations = {
     // Language
     language: "ენა",
     georgian: "ქართული",
-    english: "English"
+    english: "English",
+
+    // Definitions
+    definition: "განმარტება",
+    definitionNotFound: "ამ სიტყვისთვის განმარტება არ არის ხელმისაწვდომი.",
+    partOfSpeech: "სიტყვის მნიშვნელობა",
+    example: "მაგალითი"
   }
 };
 

@@ -1,307 +1,1024 @@
 <!doctype html>
 <html lang="ka">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
-  <title data-i18n="appName">სიტყვური</title>
-  <meta name="theme-color" content="#0f1220" />
-  <link rel="icon" type="image/png" href="icon.png" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icon.png" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="PVP სიტყვური" />
-  <link rel="stylesheet" href="singleplayer.css" />
-</head>
-<body>
-  <!-- AD PLACEHOLDER TOP (hidden by default) -->
-  <div class="ad-placeholder ad-top" id="adTop" style="display: none;">
-    <span data-i18n="advertisement">რეკლამა</span>
-  </div>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
+    />
+    <title data-i18n="appName">სიტყვური</title>
+    <meta name="theme-color" content="#0f1220" />
+    <link rel="icon" type="image/png" href="icon.png" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" href="icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="PVP სიტყვური" />
+    <link rel="stylesheet" href="singleplayer.css" />
+  </head>
+  <body>
+    <!-- AD PLACEHOLDER TOP (hidden by default) -->
+    <div class="ad-placeholder ad-top" id="adTop" style="display: none">
+      <span data-i18n="advertisement">რეკლამა</span>
+    </div>
 
-  <!-- MODE SELECTOR SCREEN -->
-  <div class="modeSelector" id="modeSelector">
-    <div class="modeCard">
-      <!-- LANGUAGE SWITCHER -->
-      <div class="languageSwitcher">
-        <button class="langBtn active" id="langKa" data-lang="ka">🇬🇪 ქართული</button>
-        <button class="langBtn" id="langEn" data-lang="en">🇬🇧 English</button>
-      </div>
-
-      <div class="logo">
-        <div class="logoDot"></div>
-        <h1 data-i18n="appName">Work IN Progress</h1>
-      </div>
-      
-      <div class="subtitle" data-i18n="chooseMode">აირჩიე თამაშის სტილი</div>
-      
-      <div class="modeButtons">
-        <button class="modeBtn daily" id="dailyModeBtn">
-          <div class="modeIcon">📅</div>
-          <div class="modeTitle" data-i18n="dailyChallenge">დღის სიტყვა</div>
-          <div class="modeDesc" data-i18n="dailyChallengeDesc">ერთი თამაში დღეში</div>
-        </button>
-        
-        <button class="modeBtn endless" id="endlessModeBtn">
-          <div class="modeIcon">♾️</div>
-          <div class="modeTitle" data-i18n="endlessPractice">უსასრულო სიტყვები</div>
-          <div class="modeDesc" data-i18n="endlessPracticeDesc">შეუზღუდავი თამაში</div>
-        </button>
-        
-        <button class="modeBtn pvp" id="pvpModeBtn">
-          <div class="modeIcon">⚔️</div>
-          <div class="modeTitle" data-i18n="onlinePVP">ონლაინ თამაში PVP</div>
-          <div class="modeDesc" data-i18n="onlinePVPDesc">პირდაპირი მოწინააღმდეგე</div>
-        </button>
-
-        <!-- NEW: Quick Match Public Room -->
-        <button class="modeBtn quickmatch" id="quickMatchBtn">
-          <div class="modeIcon">🎯</div>
-          <div class="modeTitle" data-i18n="quickMatch">სწრაფი თამაში</div>
-          <div class="modeDesc" data-i18n="quickMatchDesc">საჯარო ოთახები</div>
-        </button>
-
-        <!-- NEW: Browse Public Rooms -->
-        <button class="modeBtn browse" id="browseRoomsBtn">
-          <div class="modeIcon">🌐</div>
-          <div class="modeTitle" data-i18n="browseRooms">ოთახების ძებნა</div>
-          <div class="modeDesc" data-i18n="browseRoomsDesc">საჯარო ოთახების სია</div>
-        </button>
-      </div>
-      
-      <div class="statsPreview" id="statsPreview">
-        <div class="statItem">
-          <div class="statValue" id="streakValue">0</div>
-          <div class="statLabel" data-i18n="currentStreak">მიმდინარე სერია</div>
+    <!-- ═══════════════════════════════════════════════════════════
+       AUTH SCREEN — shown when no session exists
+  ════════════════════════════════════════════════════════════ -->
+    <div class="authScreen" id="authScreen" style="display: none">
+      <div class="authCard" id="authCard">
+        <!-- Logo -->
+        <div class="authLogo">
+          <div class="authLogoDot"></div>
+          <span data-i18n="appName">WORDLE</span>
         </div>
-        <div class="statItem">
-          <div class="statValue" id="winRateValue">0%</div>
-          <div class="statLabel" data-i18n="winRate">გამარჯვების %</div>
+        <p class="authTagline" data-i18n="authTagline">
+          Sign in to save your progress
+        </p>
+
+        <!-- Tab switcher -->
+        <div class="authTabs">
+          <button class="authTab active" id="tabLogin" data-i18n="login">
+            Sign In
+          </button>
+          <button class="authTab" id="tabRegister" data-i18n="register">
+            Create Account
+          </button>
         </div>
-        <div class="statItem">
-          <div class="statValue" id="gamesValue">0</div>
-          <div class="statLabel" data-i18n="gamesPlayed">თამაშები</div>
+
+        <!-- ── LOGIN PANEL ── -->
+        <div class="authPanel" id="panelLogin">
+          <div class="authField">
+            <label data-i18n="email">Email</label>
+            <input
+              id="loginEmail"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              data-i18n-placeholder="emailPlaceholder"
+            />
+          </div>
+          <div class="authField">
+            <label data-i18n="password">Password</label>
+            <div class="passwordWrap">
+              <input
+                id="loginPassword"
+                type="password"
+                autocomplete="current-password"
+                placeholder="••••••••"
+              />
+              <button class="eyeBtn" id="loginEye" type="button">👁</button>
+            </div>
+          </div>
+          <div class="authError" id="loginError"></div>
+          <button class="authPrimaryBtn" id="loginBtn" data-i18n="signIn">
+            Sign In
+          </button>
+        </div>
+
+        <!-- ── REGISTER PANEL ── -->
+        <div class="authPanel" id="panelRegister" style="display: none">
+          <div class="authField">
+            <label data-i18n="displayName">Display Name</label>
+            <input
+              id="regName"
+              type="text"
+              autocomplete="nickname"
+              maxlength="24"
+              placeholder="Giorgi"
+              data-i18n-placeholder="namePlaceholder"
+            />
+          </div>
+          <div class="authField">
+            <label data-i18n="email">Email</label>
+            <input
+              id="regEmail"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              data-i18n-placeholder="emailPlaceholder"
+            />
+          </div>
+          <div class="authField">
+            <label data-i18n="password">Password</label>
+            <div class="passwordWrap">
+              <input
+                id="regPassword"
+                type="password"
+                autocomplete="new-password"
+                placeholder="Min. 6 characters"
+              />
+              <button class="eyeBtn" id="regEye" type="button">👁</button>
+            </div>
+          </div>
+          <div class="authError" id="regError"></div>
+          <button
+            class="authPrimaryBtn"
+            id="registerBtn"
+            data-i18n="createAccount"
+          >
+            Create Account
+          </button>
+        </div>
+
+        <!-- ── VERIFY PANEL ── -->
+        <div class="authPanel" id="panelVerify" style="display: none">
+          <div
+            style="
+              background: #0f3460;
+              border: 1px solid #1e5f9b;
+              border-radius: 12px;
+              padding: 14px;
+              margin-bottom: 16px;
+              text-align: center;
+            "
+          >
+            <div style="font-size: 20px; margin-bottom: 6px">📧</div>
+            <div
+              style="
+                color: #93c5fd;
+                font-size: 13px;
+                font-weight: 700;
+                margin-bottom: 4px;
+              "
+            >
+              კოდი გამოგზავნილია ელ.ფოსტაზე
+            </div>
+            <div
+              style="color: #64748b; font-size: 12px"
+              id="verifyEmailHint"
+            ></div>
+          </div>
+          <div class="authField">
+            <label>4-ნიშნა კოდი</label>
+            <input
+              id="verifyCodeInput"
+              type="text"
+              inputmode="numeric"
+              maxlength="4"
+              placeholder="1234"
+              style="
+                text-align: center;
+                font-size: 28px;
+                font-weight: 900;
+                letter-spacing: 12px;
+              "
+            />
+          </div>
+          <div class="authError" id="verifyError"></div>
+          <button class="authPrimaryBtn" id="verifyBtn">✅ დადასტურება</button>
+          <button
+            id="backToRegisterBtn"
+            style="
+              margin-top: 10px;
+              background: transparent;
+              border: 1px solid #334155;
+              color: #94a3b8;
+              width: 100%;
+              padding: 10px;
+              border-radius: 10px;
+              cursor: pointer;
+              font-size: 14px;
+            "
+          >
+            ← უკან
+          </button>
+        </div>
+
+        <!-- Divider -->
+        <div class="authDivider">
+          <span data-i18n="orContinueAs">or continue as</span>
+        </div>
+
+        <!-- Guest quick-play -->
+        <div class="guestRow">
+          <input
+            id="guestName"
+            type="text"
+            maxlength="24"
+            placeholder="Guest name (optional)"
+            data-i18n-placeholder="guestNamePlaceholder"
+            class="guestInput"
+          />
+          <button class="guestBtn" id="guestBtn" data-i18n="playAsGuest">
+            ⚡ Play as Guest
+          </button>
         </div>
       </div>
+    </div>
 
-      <!-- AD PLACEHOLDER MIDDLE (hidden by default) -->
-      <div class="ad-placeholder ad-middle" id="adMiddle" style="display: none;">
-        <span data-i18n="advertisement">რეკლამა</span>
+    <!-- MODE SELECTOR SCREEN -->
+    <div class="modeSelector" id="modeSelector">
+      <div class="modeCard">
+        <!-- LANGUAGE SWITCHER -->
+        <div class="languageSwitcher">
+          <button class="langBtn active" id="langKa" data-lang="ka">
+            🇬🇪 ქართული
+          </button>
+          <button class="langBtn" id="langEn" data-lang="en">🇬🇧 English</button>
+        </div>
+
+        <!-- USER BUTTON -->
+        <div class="userMenuContainer">
+          <button class="userBtn" id="userBtn">
+            <span class="userIcon">👤</span>
+            <span class="userLabel" data-i18n="user">USER</span>
+          </button>
+          <div class="userDropdown" id="userDropdown" style="display: none">
+            <!-- Not logged in -->
+            <div id="userMenuGuest">
+              <button class="userMenuItem" id="menuLoginBtn" data-i18n="login">
+                შესვლა
+              </button>
+              <button
+                class="userMenuItem"
+                id="menuRegisterBtn"
+                data-i18n="register"
+              >
+                რეგისტრაცია
+              </button>
+              <button
+                class="userMenuItem"
+                id="menuGuestBtn"
+                data-i18n="playAsGuest"
+              >
+                ⚡ სტუმრად
+              </button>
+            </div>
+            <!-- Logged in -->
+            <div id="userMenuLogged" style="display: none">
+              <div class="userMenuHeader">
+                <div class="userAvatar" id="menuAvatar"></div>
+                <div class="userDetails">
+                  <div class="userName" id="menuUserName">User</div>
+                  <div class="userStatus" id="menuUserStatus">✓</div>
+                </div>
+              </div>
+              <button
+                class="userMenuItem"
+                id="menuEditProfileBtn"
+                data-i18n="editProfile"
+              >
+                ✏️ პროფილი
+              </button>
+              <button
+                class="userMenuItem danger"
+                id="menuLogoutBtn"
+                data-i18n="signOut"
+              >
+                🚪 გასვლა
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- USER PROFILE PILL -->
+        <div class="profilePill" id="profilePill" style="display: none">
+          <div class="profileAvatar" id="profileAvatar"></div>
+          <div class="profileInfo">
+            <div class="profileName" id="profileName"></div>
+            <div class="profileBadge" id="profileBadge"></div>
+          </div>
+          <button class="profileMenuBtn" id="profileMenuBtn">⋯</button>
+        </div>
+
+        <!-- PROFILE DROPDOWN -->
+        <div class="profileDropdown" id="profileDropdown" style="display: none">
+          <button
+            class="profileDropItem"
+            id="editProfileBtn"
+            data-i18n="editProfile"
+          >
+            ✏️ Edit Profile
+          </button>
+          <button
+            class="profileDropItem danger"
+            id="logoutBtn"
+            data-i18n="signOut"
+          >
+            🚪 Sign Out
+          </button>
+        </div>
+
+        <div class="logo">
+          <div class="logoDot"></div>
+          <h1 data-i18n="appName">Work IN Progress</h1>
+        </div>
+
+        <div class="subtitle" data-i18n="chooseMode">აირჩიე თამაშის სტილი</div>
+
+        <div class="modeButtons">
+          <button class="modeBtn daily" id="dailyModeBtn">
+            <div class="modeIcon">📅</div>
+            <div class="modeTitle" data-i18n="dailyChallenge">დღის სიტყვა</div>
+            <div class="modeDesc" data-i18n="dailyChallengeDesc">
+              ერთი თამაში დღეში
+            </div>
+          </button>
+
+          <button class="modeBtn endless" id="endlessModeBtn">
+            <div class="modeIcon">♾️</div>
+            <div class="modeTitle" data-i18n="endlessPractice">
+              უსასრულო სიტყვები
+            </div>
+            <div class="modeDesc" data-i18n="endlessPracticeDesc">
+              შეუზღუდავი თამაში
+            </div>
+          </button>
+
+          <button class="modeBtn pvp" id="pvpModeBtn">
+            <div class="modeIcon">⚔️</div>
+            <div class="modeTitle" data-i18n="onlinePVP">ონლაინ თამაში PVP</div>
+            <div class="modeDesc" data-i18n="onlinePVPDesc">
+              პირდაპირი მოწინააღმდეგე
+            </div>
+          </button>
+
+          <!-- NEW: Quick Match Public Room -->
+          <button class="modeBtn quickmatch" id="quickMatchBtn">
+            <div class="modeIcon">🎯</div>
+            <div class="modeTitle" data-i18n="quickMatch">სწრაფი თამაში</div>
+            <div class="modeDesc" data-i18n="quickMatchDesc">
+              საჯარო ოთახები
+            </div>
+          </button>
+
+          <!-- NEW: Browse Public Rooms -->
+          <button class="modeBtn browse" id="browseRoomsBtn">
+            <div class="modeIcon">🌐</div>
+            <div class="modeTitle" data-i18n="browseRooms">ოთახების ძებნა</div>
+            <div class="modeDesc" data-i18n="browseRoomsDesc">
+              საჯარო ოთახების სია
+            </div>
+          </button>
+        </div>
+
+        <div class="statsPreview" id="statsPreview">
+          <div class="statItem">
+            <div class="statValue" id="streakValue">0</div>
+            <div class="statLabel" data-i18n="currentStreak">
+              მიმდინარე სერია
+            </div>
+          </div>
+          <div class="statItem">
+            <div class="statValue" id="winRateValue">0%</div>
+            <div class="statLabel" data-i18n="winRate">გამარჯვების %</div>
+          </div>
+          <div class="statItem">
+            <div class="statValue" id="gamesValue">0</div>
+            <div class="statLabel" data-i18n="gamesPlayed">თამაშები</div>
+          </div>
+        </div>
+
+        <!-- AD PLACEHOLDER MIDDLE (hidden by default) -->
+        <div
+          class="ad-placeholder ad-middle"
+          id="adMiddle"
+          style="display: none"
+        >
+          <span data-i18n="advertisement">რეკლამა</span>
+        </div>
+
+        <div class="refreshBanner">
+          <button
+            class="refreshBtn"
+            id="refreshBtn"
+            onclick="location.reload()"
+          >
+            <span class="refreshIcon">🔄</span>
+            <span class="refreshText" data-i18n="refreshText"
+              >განახლე საუკეთესო თამაშისთვის</span
+            >
+          </button>
+        </div>
       </div>
+    </div>
 
-      <div class="refreshBanner">
-        <button class="refreshBtn" id="refreshBtn" onclick="location.reload()">
-          <span class="refreshIcon">🔄</span>
-          <span class="refreshText" data-i18n="refreshText">განახლე საუკეთესო თამაშისთვის</span>
+    <!-- GAME SCREEN -->
+    <div class="gameScreen" id="gameScreen" style="display: none">
+      <header class="header">
+        <button class="backBtn" id="backBtn" data-i18n="back">← უკან</button>
+        <div class="headerTitle">
+          <span id="gameMode" data-i18n="dailyChallenge">დღის გამოწვევა</span>
+          <span id="wordLengthIndicator"></span>
+        </div>
+        <button class="statsBtn" id="statsBtn">📊</button>
+      </header>
+
+      <main class="gameContainer">
+        <div class="gameInfo">
+          <div class="streak" id="streakDisplay">
+            🔥 <span id="currentStreak">0</span>
+            <span data-i18n="dayStreak">დღის სერია</span>
+          </div>
+          <div class="guessCounter">
+            <span id="guessesUsed">0</span>/6
+            <span data-i18n="guesses">მცდელობა</span>
+          </div>
+        </div>
+
+        <div class="boardWrapper">
+          <div class="board" id="board"></div>
+        </div>
+
+        <div class="keyboard" id="keyboard"></div>
+      </main>
+    </div>
+
+    <!-- LENGTH SELECTOR MODAL (for endless mode) -->
+    <div class="modal" id="lengthModal" hidden>
+      <div class="modalCard">
+        <h2 data-i18n="chooseWordLength">აირჩიე სიტყვის სიგრძე</h2>
+        <div class="lengthButtons">
+          <button class="lengthBtn" data-length="5">
+            5 <span data-i18n="letters">ასო</span>
+          </button>
+          <button class="lengthBtn" data-length="6">
+            6 <span data-i18n="letters">ასო</span>
+          </button>
+          <button class="lengthBtn" data-length="7">
+            7 <span data-i18n="letters">ასო</span>
+          </button>
+          <button class="lengthBtn" data-length="8">
+            8 <span data-i18n="letters">ასო</span>
+          </button>
+          <button class="lengthBtn" data-length="9">
+            9 <span data-i18n="letters">ასო</span>
+          </button>
+          <button class="lengthBtn" data-length="10">
+            10 <span data-i18n="letters">ასო</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PUBLIC ROOMS BROWSER MODAL -->
+    <div class="modal" id="roomsBrowserModal" hidden>
+      <div class="modalCard roomsBrowserCard">
+        <div class="modalHeader">
+          <h2 data-i18n="publicRooms">საჯარო ოთახები</h2>
+          <button class="closeBtn" id="closeRoomsBtn">✕</button>
+        </div>
+
+        <div class="roomsList" id="roomsList">
+          <div class="roomsLoading" data-i18n="loading">იტვირთება...</div>
+        </div>
+
+        <div class="roomsActions">
+          <button class="btn" id="refreshRoomsBtn" data-i18n="refresh">
+            🔄 განახლება
+          </button>
+          <button
+            class="btn ghost"
+            id="createPublicRoomBtn"
+            data-i18n="newRoom"
+          >
+            + ახალი ოთახი
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS MODAL -->
+    <div class="modal" id="statsModal" hidden>
+      <div class="modalCard statsCard">
+        <div class="modalHeader">
+          <h2 data-i18n="statistics">სტატისტიკა</h2>
+          <button class="closeBtn" id="closeStatsBtn" data-i18n="close">
+            ✕
+          </button>
+        </div>
+
+        <div class="statsGrid">
+          <div class="statBox">
+            <div class="statBig" id="totalGamesStats">0</div>
+            <div class="statSmall" data-i18n="played">თამაში</div>
+          </div>
+          <div class="statBox">
+            <div class="statBig" id="winPercentStats">0</div>
+            <div class="statSmall" data-i18n="winPercent">გამარჯვ. %</div>
+          </div>
+          <div class="statBox">
+            <div class="statBig" id="currentStreakStats">0</div>
+            <div class="statSmall" data-i18n="currentStreak">
+              მიმდინარე სერია
+            </div>
+          </div>
+          <div class="statBox">
+            <div class="statBig" id="maxStreakStats">0</div>
+            <div class="statSmall" data-i18n="maxStreak">მაქს. სერია</div>
+          </div>
+        </div>
+
+        <div class="guessDistribution" id="guessDistribution"></div>
+
+        <button class="resetBtn" id="resetStatsBtn" data-i18n="resetStats">
+          სტატისტიკის გადატვირთვა
         </button>
       </div>
     </div>
-  </div>
 
-  <!-- GAME SCREEN -->
-  <div class="gameScreen" id="gameScreen" style="display:none;">
-    <header class="header">
-      <button class="backBtn" id="backBtn" data-i18n="back">← უკან</button>
-      <div class="headerTitle">
-        <span id="gameMode" data-i18n="dailyChallenge">დღის გამოწვევა</span>
-        <span id="wordLengthIndicator"></span>
-      </div>
-      <button class="statsBtn" id="statsBtn">📊</button>
-    </header>
-
-    <main class="gameContainer">
-      <div class="gameInfo">
-        <div class="streak" id="streakDisplay">
-          🔥 <span id="currentStreak">0</span> <span data-i18n="dayStreak">დღის სერია</span>
+    <!-- WIN MODAL (with definition) -->
+    <div class="modal" id="winModal" hidden>
+      <div class="modalCard winCard">
+        <div class="winHeader">
+          <div class="winEmoji">🎉</div>
+          <h2 id="winTitle" data-i18n="youWon">მოიგე!</h2>
         </div>
-        <div class="guessCounter">
-          <span id="guessesUsed">0</span>/6 <span data-i18n="guesses">მცდელობა</span>
+
+        <div class="winStats">
+          <div class="winStatItem">
+            <span class="winStatLabel" data-i18n="guesses">მცდელობები:</span>
+            <span class="winStatValue" id="winGuesses">-</span>
+          </div>
+          <div class="winStatItem">
+            <span class="winStatLabel" data-i18n="currentStreak">სერია:</span>
+            <span class="winStatValue" id="winStreak">-</span>
+          </div>
         </div>
-      </div>
 
+        <div class="wordReveal">
+          <div class="wordLabel" data-i18n="theWordWas">სიტყვა იყო:</div>
+          <div class="theWord" id="theWord">სიტყვა</div>
+        </div>
 
-      <div class="boardWrapper">
-        <div class="board" id="board"></div>
-      </div>
+        <div class="definition" id="definitionBox">
+          <div class="defLoading" data-i18n="loadingDefinition">
+            იტვირთება განმარტება...
+          </div>
+        </div>
 
-      <div class="keyboard" id="keyboard"></div>
-    </main>
-  </div>
-
-  <!-- LENGTH SELECTOR MODAL (for endless mode) -->
-  <div class="modal" id="lengthModal" hidden>
-    <div class="modalCard">
-      <h2 data-i18n="chooseWordLength">აირჩიე სიტყვის სიგრძე</h2>
-      <div class="lengthButtons">
-        <button class="lengthBtn" data-length="5">5 <span data-i18n="letters">ასო</span></button>
-        <button class="lengthBtn" data-length="6">6 <span data-i18n="letters">ასო</span></button>
-        <button class="lengthBtn" data-length="7">7 <span data-i18n="letters">ასო</span></button>
-        <button class="lengthBtn" data-length="8">8 <span data-i18n="letters">ასო</span></button>
-        <button class="lengthBtn" data-length="9">9 <span data-i18n="letters">ასო</span></button>
-        <button class="lengthBtn" data-length="10">10 <span data-i18n="letters">ასო</span></button>
+        <div class="winActions">
+          <button class="playAgainBtn" id="playAgainBtn" data-i18n="playAgain">
+            კიდევ თამაში
+          </button>
+          <button class="shareBtn" id="shareBtn" data-i18n="shareResults">
+            გაზიარება
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- PUBLIC ROOMS BROWSER MODAL -->
-  <div class="modal" id="roomsBrowserModal" hidden>
-    <div class="modalCard roomsBrowserCard">
-      <div class="modalHeader">
-        <h2 data-i18n="publicRooms">საჯარო ოთახები</h2>
-        <button class="closeBtn" id="closeRoomsBtn">✕</button>
-      </div>
-      
-      <div class="roomsList" id="roomsList">
-        <div class="roomsLoading" data-i18n="loading">იტვირთება...</div>
-      </div>
+    <!-- LOSE MODAL -->
+    <div class="modal" id="loseModal" hidden>
+      <div class="modalCard loseCard">
+        <div class="loseHeader">
+          <div class="loseEmoji">😢</div>
+          <h2 data-i18n="betterLuck">შენ წააგე</h2>
+        </div>
 
-      <div class="roomsActions">
-        <button class="btn" id="refreshRoomsBtn" data-i18n="refresh">🔄 განახლება</button>
-        <button class="btn ghost" id="createPublicRoomBtn" data-i18n="newRoom">+ ახალი ოთახი</button>
+        <div class="wordReveal">
+          <div class="wordLabel" data-i18n="theWordWas">სიტყვა იყო:</div>
+          <div class="theWord" id="loseWord">სიტყვა</div>
+        </div>
+
+        <div class="definition" id="loseDefinitionBox">
+          <div class="defLoading" data-i18n="loadingDefinition">
+            იტვირთება განმარტება...
+          </div>
+        </div>
+
+        <div class="loseActions">
+          <button
+            class="playAgainBtn"
+            id="losePlayAgainBtn"
+            data-i18n="tryAgain"
+          >
+            თავიდან ცდა
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- STATS MODAL -->
-  <div class="modal" id="statsModal" hidden>
-    <div class="modalCard statsCard">
-      <div class="modalHeader">
-        <h2 data-i18n="statistics">სტატისტიკა</h2>
-        <button class="closeBtn" id="closeStatsBtn" data-i18n="close">✕</button>
-      </div>
-      
-      <div class="statsGrid">
-        <div class="statBox">
-          <div class="statBig" id="totalGamesStats">0</div>
-          <div class="statSmall" data-i18n="played">თამაში</div>
+    <!-- AUTH MODAL -->
+    <div class="modal" id="authModal" hidden>
+      <div class="modalCard authCard">
+        <div class="authTabs">
+          <button class="authTab active" data-tab="login">შესვლა</button>
+          <button class="authTab" data-tab="register">რეგისტრაცია</button>
+          <button class="authTab" data-tab="guest">სტუმარი</button>
         </div>
-        <div class="statBox">
-          <div class="statBig" id="winPercentStats">0</div>
-          <div class="statSmall" data-i18n="winPercent">გამარჯვ. %</div>
+
+        <!-- Login Tab -->
+        <div class="authContent" id="authLogin">
+          <input
+            type="email"
+            id="loginEmail"
+            placeholder="ელ.ფოსტა"
+            class="authInput"
+          />
+          <input
+            type="password"
+            id="loginPassword"
+            placeholder="პაროლი"
+            class="authInput"
+          />
+          <button class="btn authBtn" id="loginBtn">შესვლა</button>
         </div>
-        <div class="statBox">
-          <div class="statBig" id="currentStreakStats">0</div>
-          <div class="statSmall" data-i18n="currentStreak">მიმდინარე სერია</div>
+
+        <!-- Register Tab -->
+        <div class="authContent" id="authRegister" style="display: none">
+          <input
+            type="email"
+            id="registerEmail"
+            placeholder="ელ.ფოსტა"
+            class="authInput"
+          />
+          <button class="btn authBtn" id="sendCodeBtn">კოდის გაგზავნა</button>
+
+          <div id="verificationStep" style="display: none; margin-top: 20px">
+            <div class="verifyCodeDisplay">
+              <span class="codeDigit">4</span>
+              <span class="codeDigit">X</span>
+              <span class="codeDigit">7</span>
+              <span class="codeDigit">P</span>
+            </div>
+            <p class="verifyText">Enter the 4-digit code sent to your email</p>
+            <div class="codeInputs">
+              <input type="text" maxlength="1" class="codeInput" id="code1" />
+              <input type="text" maxlength="1" class="codeInput" id="code2" />
+              <input type="text" maxlength="1" class="codeInput" id="code3" />
+              <input type="text" maxlength="1" class="codeInput" id="code4" />
+            </div>
+            <button class="btn authBtn" id="verifyBtn">ვერიფიკაცია</button>
+          </div>
         </div>
-        <div class="statBox">
-          <div class="statBig" id="maxStreakStats">0</div>
-          <div class="statSmall" data-i18n="maxStreak">მაქს. სერია</div>
+
+        <!-- Guest Tab -->
+        <div class="authContent" id="authGuest" style="display: none">
+          <p class="guestInfo">Play as guest without creating an account</p>
+          <button class="btn authBtn guestBtn" id="guestPlayBtn">
+            სტუმრად თამაში
+          </button>
         </div>
-      </div>
 
-      <div class="guessDistribution" id="guessDistribution"></div>
-
-      <button class="resetBtn" id="resetStatsBtn" data-i18n="resetStats">სტატისტიკის გადატვირთვა</button>
-    </div>
-  </div>
-
-  <!-- WIN MODAL (with definition) -->
-  <div class="modal" id="winModal" hidden>
-    <div class="modalCard winCard">
-      <div class="winHeader">
-        <div class="winEmoji">🎉</div>
-        <h2 id="winTitle" data-i18n="youWon">მოიგე!</h2>
-      </div>
-      
-      <div class="winStats">
-        <div class="winStatItem">
-          <span class="winStatLabel" data-i18n="guesses">მცდელობები:</span>
-          <span class="winStatValue" id="winGuesses">-</span>
-        </div>
-        <div class="winStatItem">
-          <span class="winStatLabel" data-i18n="currentStreak">სერია:</span>
-          <span class="winStatValue" id="winStreak">-</span>
-        </div>
-      </div>
-
-      <div class="wordReveal">
-        <div class="wordLabel" data-i18n="theWordWas">სიტყვა იყო:</div>
-        <div class="theWord" id="theWord">სიტყვა</div>
-      </div>
-
-      <div class="definition" id="definitionBox">
-        <div class="defLoading" data-i18n="loadingDefinition">იტვირთება განმარტება...</div>
-      </div>
-
-      <div class="winActions">
-        <button class="playAgainBtn" id="playAgainBtn" data-i18n="playAgain">კიდევ თამაში</button>
-        <button class="shareBtn" id="shareBtn" data-i18n="shareResults">გაზიარება</button>
+        <button class="closeAuthBtn" id="closeAuthBtn">✕</button>
       </div>
     </div>
-  </div>
 
-  <!-- LOSE MODAL -->
-  <div class="modal" id="loseModal" hidden>
-    <div class="modalCard loseCard">
-      <div class="loseHeader">
-        <div class="loseEmoji">😢</div>
-        <h2 data-i18n="betterLuck">შენ წააგე</h2>
-      </div>
-      
-      <div class="wordReveal">
-        <div class="wordLabel" data-i18n="theWordWas">სიტყვა იყო:</div>
-        <div class="theWord" id="loseWord">სიტყვა</div>
-      </div>
+    <!-- TOAST NOTIFICATIONS -->
+    <div class="toast" id="toast" hidden></div>
 
-      <div class="definition" id="loseDefinitionBox">
-        <div class="defLoading" data-i18n="loadingDefinition">იტვირთება განმარტება...</div>
-      </div>
-
-      <div class="loseActions">
-        <button class="playAgainBtn" id="losePlayAgainBtn" data-i18n="tryAgain">თავიდან ცდა</button>
-      </div>
+    <!-- AD PLACEHOLDER BOTTOM (hidden by default) -->
+    <div class="ad-placeholder ad-bottom" id="adBottom" style="display: none">
+      <span data-i18n="advertisement">რეკლამა</span>
     </div>
-  </div>
 
-  <!-- TOAST NOTIFICATIONS -->
-  <div class="toast" id="toast" hidden></div>
+    <script src="translations.js"></script>
+    <script src="auth.js"></script>
+    <script type="module" src="wordlist.js"></script>
+    <script type="module" src="singleplayer.js"></script>
 
-  <!-- AD PLACEHOLDER BOTTOM (hidden by default) -->
-  <div class="ad-placeholder ad-bottom" id="adBottom" style="display: none;">
-    <span data-i18n="advertisement">რეკლამა</span>
-  </div>
+    <script>
+      // Language switcher functionality
+      document.addEventListener("DOMContentLoaded", () => {
+        const langKa = document.getElementById("langKa");
+        const langEn = document.getElementById("langEn");
 
-  <script src="translations.js"></script>
-  <script type="module" src="wordlist.js"></script>
-  <script type="module" src="singleplayer.js"></script>
-  
-  <script>
-    // Language switcher functionality
-    document.addEventListener('DOMContentLoaded', () => {
-      const langKa = document.getElementById('langKa');
-      const langEn = document.getElementById('langEn');
-      
-      // Set active language on load
-      const currentLang = getCurrentLanguage();
-      if (currentLang === 'en') {
-        langKa.classList.remove('active');
-        langEn.classList.add('active');
-      }
-      
-      // Language switch handlers
-      langKa.addEventListener('click', () => {
-        setLanguage('ka');
-        langKa.classList.add('active');
-        langEn.classList.remove('active');
+        // Set active language on load
+        const currentLang = getCurrentLanguage();
+        if (currentLang === "en") {
+          langKa.classList.remove("active");
+          langEn.classList.add("active");
+        }
+
+        // Language switch handlers
+        langKa.addEventListener("click", () => {
+          setLanguage("ka");
+          langKa.classList.add("active");
+          langEn.classList.remove("active");
+        });
+
+        langEn.addEventListener("click", () => {
+          setLanguage("en");
+          langEn.classList.add("active");
+          langKa.classList.remove("active");
+        });
+
+        // Initial translation
+        updateAllTexts();
+
+        // Auth initialization
+        const user = Auth.currentUser();
+        if (!user) {
+          document.getElementById("authScreen").style.display = "flex";
+          document.getElementById("modeSelector").style.display = "none";
+        } else {
+          document.getElementById("profilePill").style.display = "flex";
+          document.getElementById("profileName").textContent = user.name;
+          document.getElementById("profileBadge").textContent = user.isGuest
+            ? "👤"
+            : "✓";
+          const avatar = document.getElementById("profileAvatar");
+          if (avatar) {
+            const [c1, c2] = Auth.avatarColors(user.name);
+            avatar.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+            avatar.textContent = Auth.getInitials(user.name);
+          }
+        }
+
+        // Tab switching for auth
+        document.getElementById("tabLogin")?.addEventListener("click", () => {
+          document.getElementById("tabLogin").classList.add("active");
+          document.getElementById("tabRegister").classList.remove("active");
+          document.getElementById("panelLogin").style.display = "";
+          document.getElementById("panelRegister").style.display = "none";
+        });
+        document
+          .getElementById("tabRegister")
+          ?.addEventListener("click", () => {
+            document.getElementById("tabRegister").classList.add("active");
+            document.getElementById("tabLogin").classList.remove("active");
+            document.getElementById("panelRegister").style.display = "";
+            document.getElementById("panelLogin").style.display = "none";
+          });
+
+        // Login
+        document
+          .querySelector(".authScreen .authPrimaryBtn")
+          ?.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("loginEmail")?.value;
+            const password = document.getElementById("loginPassword")?.value;
+            if (!email || !password) {
+              document.getElementById("loginError").textContent =
+                "Please enter email and password";
+              return;
+            }
+            const result = await Auth.login({ email, password });
+            if (!result.ok) {
+              document.getElementById("loginError").textContent = result.error;
+              return;
+            }
+            showGameUI();
+          });
+
+        // Register - send verification code
+        document
+          .getElementById("registerBtn")
+          ?.addEventListener("click", async (e) => {
+            e.preventDefault();
+            console.log("Register button clicked");
+
+            const name = document.getElementById("regName")?.value;
+            const email = document.getElementById("regEmail")?.value;
+            const password = document.getElementById("regPassword")?.value;
+
+            console.log("Registration data:", { name, email });
+
+            if (!name || !email || !password) {
+              document.getElementById("regError").textContent =
+                "Please fill in all fields";
+              return;
+            }
+
+            // Show verification step
+            document.getElementById("regError").textContent = "";
+            document.getElementById("registerBtn").textContent = "Sending...";
+            document.getElementById("registerBtn").disabled = true;
+
+            const result = await Auth.registerStart({ name, email, password });
+            console.log("registerStart result:", result);
+
+            document.getElementById("registerBtn").textContent =
+              "Create Account";
+            document.getElementById("registerBtn").disabled = false;
+
+            if (!result.ok) {
+              document.getElementById("regError").textContent = result.error;
+              return;
+            }
+
+            // Show verification input
+            document.getElementById("regName").style.display = "none";
+            document.getElementById("regEmail").style.display = "none";
+            document.getElementById("regPassword").style.display = "none";
+            document.getElementById("registerBtn").style.display = "none";
+
+            let verifySection = document.getElementById("verifySection");
+            if (!verifySection) {
+              verifySection = document.createElement("div");
+              verifySection.id = "verifySection";
+
+              // Show styled HTML if available, otherwise show simple input
+              if (result.styledHTML) {
+                verifySection.innerHTML =
+                  result.styledHTML +
+                  `
+              <div style="margin-top:20px;">
+                <input type="text" id="verifyCode" maxlength="4" 
+                  style="width:140px;padding:14px;font-size:22px;text-align:center;letter-spacing:10px;background:#1e293b;border:2px solid #475569;border-radius:12px;color:#fff;"
+                  placeholder="____" />
+              </div>
+              <button class="authPrimaryBtn" id="verifyRegisterBtn" style="margin-top:16px;">Verify Code</button>
+            `;
+              } else {
+                verifySection.innerHTML = `
+              <div style="text-align:center;margin-bottom:16px;">
+                <div style="font-size:14px;color:var(--text-muted);margin-bottom:12px;">
+                  Enter the 4-digit code sent to your email
+                </div>
+                <input type="text" id="verifyCode" maxlength="4" 
+                  style="width:120px;padding:12px;font-size:24px;text-align:center;letter-spacing:8px;"
+                  placeholder="****" />
+              </div>
+              <button class="authPrimaryBtn" id="verifyRegisterBtn">Verify</button>
+            `;
+              }
+
+              document
+                .getElementById("panelRegister")
+                .appendChild(verifySection);
+
+              // Handle verification
+              document
+                .getElementById("verifyRegisterBtn")
+                ?.addEventListener("click", async () => {
+                  console.log("Verify button clicked");
+                  const codeInput = document.getElementById("verifyCode");
+                  const code = String(codeInput?.value || "").trim();
+                  console.log("Code entered:", code, "length:", code.length);
+
+                  if (!code || code.length !== 4 || !/^\d{4}$/.test(code)) {
+                    alert("Please enter 4-digit code");
+                    return;
+                  }
+
+                  const result = await Auth.registerVerify(code);
+                  console.log("Verification result:", result);
+
+                  if (!result.ok) {
+                    alert(result.error);
+                    return;
+                  }
+
+                  console.log("Registration successful, showing game UI");
+                  showGameUI();
+                });
+
+              // Also handle Enter key on verification input
+              document
+                .getElementById("verifyCode")
+                ?.addEventListener("keydown", async (e) => {
+                  if (e.key === "Enter") {
+                    document.getElementById("verifyRegisterBtn")?.click();
+                  }
+                });
+            }
+            verifySection.style.display = "block";
+          });
+
+        // Guest
+        document.getElementById("guestBtn")?.addEventListener("click", () => {
+          const name = document.getElementById("guestName")?.value || "Guest";
+          const result = Auth.loginAsGuest(name);
+          if (result.ok) {
+            showGameUI();
+          }
+        });
+
+        // Show game UI
+        function showGameUI() {
+          document.getElementById("authScreen").style.display = "none";
+          document.getElementById("modeSelector").style.display = "block";
+          document.getElementById("profilePill").style.display = "flex";
+          const user = Auth.currentUser();
+          if (user) {
+            document.getElementById("profileName").textContent = user.name;
+            document.getElementById("profileBadge").textContent = user.isGuest
+              ? "👤"
+              : "✓";
+            const avatar = document.getElementById("profileAvatar");
+            if (avatar) {
+              const [c1, c2] = Auth.avatarColors(user.name);
+              avatar.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+              avatar.textContent = Auth.getInitials(user.name);
+            }
+          }
+        }
+
+        // Profile dropdown
+        document
+          .getElementById("profileMenuBtn")
+          ?.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const dropdown = document.getElementById("profileDropdown");
+            dropdown.style.display =
+              dropdown.style.display === "none" ? "block" : "none";
+          });
+        document.addEventListener("click", () => {
+          document.getElementById("profileDropdown").style.display = "none";
+        });
+
+        // User menu toggle
+        const userBtn = document.getElementById("userBtn");
+        const userDropdown = document.getElementById("userDropdown");
+        userBtn?.addEventListener("click", (e) => {
+          e.stopPropagation();
+          userDropdown.style.display =
+            userDropdown.style.display === "none" ? "block" : "none";
+
+          // Update menu based on login state
+          const user = Auth.currentUser();
+          if (user) {
+            document.getElementById("userMenuGuest").style.display = "none";
+            document.getElementById("userMenuLogged").style.display = "block";
+            document.getElementById("menuUserName").textContent = user.name;
+            document.getElementById("menuUserStatus").textContent = user.isGuest
+              ? "👤"
+              : "✓";
+            const menuAvatar = document.getElementById("menuAvatar");
+            const [c1, c2] = Auth.avatarColors(user.name);
+            menuAvatar.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+            menuAvatar.textContent = Auth.getInitials(user.name);
+          } else {
+            document.getElementById("userMenuGuest").style.display = "block";
+            document.getElementById("userMenuLogged").style.display = "none";
+          }
+        });
+
+        document.addEventListener("click", () => {
+          userDropdown.style.display = "none";
+        });
+
+        // User menu: Login
+        document
+          .getElementById("menuLoginBtn")
+          ?.addEventListener("click", () => {
+            userDropdown.style.display = "none";
+            document.getElementById("tabLogin").click();
+            document.getElementById("authScreen").style.display = "flex";
+            document.getElementById("modeSelector").style.display = "none";
+          });
+
+        // User menu: Register
+        document
+          .getElementById("menuRegisterBtn")
+          ?.addEventListener("click", () => {
+            userDropdown.style.display = "none";
+            document.getElementById("tabRegister").click();
+            document.getElementById("authScreen").style.display = "flex";
+            document.getElementById("modeSelector").style.display = "none";
+          });
+
+        // User menu: Guest
+        document
+          .getElementById("menuGuestBtn")
+          ?.addEventListener("click", () => {
+            userDropdown.style.display = "none";
+            const result = Auth.loginAsGuest("Guest");
+            if (result.ok) {
+              showGameUI();
+            }
+          });
+
+        // User menu: Edit Profile
+        document
+          .getElementById("menuEditProfileBtn")
+          ?.addEventListener("click", () => {
+            userDropdown.style.display = "none";
+            document.getElementById("editProfileModal").hidden = false;
+          });
+
+        // User menu: Logout
+        document
+          .getElementById("menuLogoutBtn")
+          ?.addEventListener("click", () => {
+            Auth.logout();
+            userDropdown.style.display = "none";
+            document.getElementById("profilePill").style.display = "none";
+            document.getElementById("profileDropdown").style.display = "none";
+            document.getElementById("modeSelector").style.display = "none";
+            document.getElementById("authScreen").style.display = "flex";
+          });
+
+        // Logout
+        document.getElementById("logoutBtn")?.addEventListener("click", () => {
+          Auth.logout();
+          document.getElementById("profilePill").style.display = "none";
+          document.getElementById("profileDropdown").style.display = "none";
+          document.getElementById("modeSelector").style.display = "none";
+          document.getElementById("authScreen").style.display = "flex";
+        });
       });
-      
-      langEn.addEventListener('click', () => {
-        setLanguage('en');
-        langEn.classList.add('active');
-        langKa.classList.remove('active');
-      });
-      
-      // Initial translation
-      updateAllTexts();
-    });
 
-    // Ad visibility toggle (for testing)
-    window.toggleAds = function(show) {
-      ['adTop', 'adMiddle', 'adBottom'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = show ? 'flex' : 'none';
+      // Ad visibility toggle (for testing)
+      window.toggleAds = function (show) {
+        ["adTop", "adMiddle", "adBottom"].forEach((id) => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = show ? "flex" : "none";
+        });
+      };
+
+      // Close auth modal
+      document.getElementById("closeAuthBtn")?.addEventListener("click", () => {
+        document.getElementById("authModal").hidden = true;
       });
-    };
-  </script>
-</body>
+    </script>
+  </body>
 </html>

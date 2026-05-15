@@ -134,7 +134,7 @@ function updateStatsPreview(stats) {
   $("gamesValue").textContent = totalGames;
 }
 
-function startDailyMode() {
+async function startDailyMode() {
   const stats = loadStats();
   const today = getTodayString();
 
@@ -144,7 +144,7 @@ function startDailyMode() {
   }
 
   state.mode = "daily";
-  const dailyData = getDailyWord();
+  const dailyData = await getDailyWord();
   state.word = dailyData.word;
   state.length = dailyData.length;
 
@@ -164,9 +164,9 @@ function showLengthSelector() {
   });
 }
 
-function startEndlessMode(length) {
+async function startEndlessMode(length) {
   state.mode = "endless";
-  state.word = getRandomWord(length);
+  state.word = await getRandomWord(length);
   state.length = length;
   initGame();
 }
@@ -295,12 +295,20 @@ function evaluateGuess(guess) {
 }
 
 // ===== KEYBOARD =====
+function getKeyboardRows() {
+  const lang = getCurrentLanguage();
+  if (lang === "ka") {
+    return ["ქწერტყუიოპ", "ასდფგჰჯკლ", "ზხცვბნმხ"];
+  }
+  return ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+}
+
 function buildKeyboard() {
   const kb = $("keyboard");
   kb.classList.add("kb");
   kb.innerHTML = "";
 
-  const rows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
+  const rows = getKeyboardRows();
 
   const mkBtn = (label, cls, onClick) => {
     const b = document.createElement("button");
@@ -360,22 +368,43 @@ function updateKeyboardColors() {
 }
 
 // ===== INPUT HANDLING =====
+function isGeorgianKey(key) {
+  const georgianChars = 'აბგდევზთიკლმნოპრსტუფქღყშჩცძწხ';
+  return georgianChars.includes(key.toLowerCase());
+}
+
 function handleKeyPress(e) {
   if (state.gameOver) return;
 
   if (e.key === "Enter") handleKey("ENTER");
-  else if (e.key === "Backspace") handleKey("⌫");
-  else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
+  else if (e.key === "Backspace" || e.key === "Delete") handleKey("⌫");
+  else if (/^[a-zA-Z]$/.test(e.key)) {
+    // English
+    handleKey(e.key.toUpperCase());
+  } else if (isGeorgianKey(e.key)) {
+    // Georgian
+    handleKey(e.key);
+  }
+}
+
+function isValidLetter(key, lang) {
+  if (lang === 'ka') {
+    const georgianChars = 'აბგდევზთიკლმნოპრსტუფქღყშჩცძწხ';
+    return georgianChars.includes(key);
+  }
+  return /^[A-Z]$/.test(key);
 }
 
 function handleKey(key) {
   if (state.gameOver) return;
 
+  const lang = getCurrentLanguage();
+  
   if (key === "ENTER") submitGuess();
   else if (key === "⌫") {
     state.currentGuess = state.currentGuess.slice(0, -1);
     renderBoard();
-  } else if (key.length === 1 && /^[A-Z]$/.test(key)) {
+  } else if (key.length === 1 && isValidLetter(key, lang)) {
     if (state.currentGuess.length < state.length) {
       state.currentGuess += key;
       renderBoard();
@@ -383,14 +412,51 @@ function handleKey(key) {
   }
 }
 
-function submitGuess() {
+async function validateWordWithAPI(word, lang) {
+  // Check local cache first
+  try {
+    const cache = JSON.parse(localStorage.getItem('validatedWords') || '{}');
+    const key = `${lang}_${word.toLowerCase()}`;
+    if (cache[key]) return cache[key];
+  } catch {}
+  
+  // If 404, use local validation
+  try {
+    const res = await fetch(`/api/validate-word?word=${encodeURIComponent(word)}&lang=${lang}`);
+    if (res.status === 404) {
+      // API not available - use local validation
+      return await isValidWord(word, word.length);
+    }
+    const data = await res.json();
+    
+    // Cache result
+    try {
+      const cache = JSON.parse(localStorage.getItem('validatedWords') || '{}');
+      const key = `${lang}_${word.toLowerCase()}`;
+      cache[key] = data.valid;
+      localStorage.setItem('validatedWords', JSON.stringify(cache));
+    } catch {}
+    
+    return data.valid;
+  } catch {
+    // Fallback to local validation if API fails
+    return await isValidWord(word, word.length);
+  }
+}
+
+async function submitGuess() {
   if (state.currentGuess.length !== state.length) {
     toast(`Word must be ${state.length} letters`);
     return;
   }
 
-  if (!isValidWord(state.currentGuess, state.length)) {
-    toast("Not in word list");
+  // Validate using API
+  const lang = getCurrentLanguage();
+  const isValid = await validateWordWithAPI(state.currentGuess, lang);
+  
+  if (!isValid) {
+    const notInListMsg = t('notInWordList') || "Not in word list";
+    toast(notInListMsg);
     shakeRow(state.guesses.length);
     return;
   }
@@ -477,43 +543,194 @@ function handleLose() {
 }
 
 // ===== DEFINITION API =====
+function getCachedDefinition(word, lang) {
+  try {
+    const cache = JSON.parse(localStorage.getItem('definitionCache') || '{}');
+    const key = `${lang}_${word.toLowerCase()}`;
+    return cache[key] || null;
+  } catch { return null; }
+}
+
+function setCachedDefinition(word, lang, data) {
+  try {
+    const cache = JSON.parse(localStorage.getItem('definitionCache') || '{}');
+    const key = `${lang}_${word.toLowerCase()}`;
+    cache[key] = data;
+    // Keep only last 100 cached definitions
+    const keys = Object.keys(cache);
+    if (keys.length > 100) {
+      keys.slice(0, keys.length - 100).forEach(k => delete cache[k]);
+    }
+    localStorage.setItem('definitionCache', JSON.stringify(cache));
+  } catch {}
+}
+
+// Local definition fallback for Georgian words - IN GEORGIAN
+const LOCAL_DEFINITIONS = {
+  ka: {
+    "სახლი": { definition: "საცხოვრებელი შენობა, სადაც ადამიანები ცხოვრობენ", partOfSpeech: "არსებითი სახელი" },
+    "წყალი": { definition: "გამჭვირვალე, უფერო სითხე, სიცოცხლისთვის აუცილებელი", partOfSpeech: "არსებითი სახელი" },
+    "თვალი": { definition: "მხედველობის ორგანო, სახის ნაწილი", partOfSpeech: "არსებითი სახელი" },
+    "წიგნი": { definition: "ბეჭდური ან ხელნაწერი გვერდების კრებული", partOfSpeech: "არსებითი სახელი" },
+    "სკოლა": { definition: "სასწავლებელი, სადაც ბავშვები განათლებას იღებენ", partOfSpeech: "არსებითი სახელი" },
+    "კვირა": { definition: "შვიდი დღის პერიოდი; ასევე კვირის ბოლო დღე", partOfSpeech: "არსებითი სახელი" },
+    "თოვლი": { definition: "თეთრი, ბამბის მსგავსი ნალექი, ზამთარში ჩამოყრილი", partOfSpeech: "არსებითი სახელი" },
+    "წვიმა": { definition: "ღრუბლებიდან ჩამოვარდნილი წყლის წვეთები", partOfSpeech: "არსებითი სახელი" },
+    "ყველი": { definition: "რძისგან დამზადებული საკვები პროდუქტი", partOfSpeech: "არსებითი სახელი" },
+    "ფიქრი": { definition: "გონებრივი მოქმედება, ფიქრი და მსჯელობა", partOfSpeech: "არსებითი სახელი" },
+    "ოჯახი": { definition: "ერთად მცხოვრები ახლობელი ადამიანების ჯგუფი", partOfSpeech: "არსებითი სახელი" },
+    "ექიმი": { definition: "მედიცინის სპეციალისტი, ავადმყოფებს მკურნალობს", partOfSpeech: "არსებითი სახელი" },
+    "ტაქსი": { definition: "ქირაობის ავტომობილი, მძღოლით", partOfSpeech: "არსებითი სახელი" },
+    "პარკი": { definition: "ხეებით, სკამებით მოწყობილი საჯარო სივრცე", partOfSpeech: "არსებითი სახელი" },
+    "ბებია": { definition: "მამის ან დედის დედა", partOfSpeech: "არსებითი სახელი" },
+    "ბაბუა": { definition: "მამის ან დედის მამა", partOfSpeech: "არსებითი სახელი" },
+    "მეტრო": { definition: "მიწისქვეშა ელექტრული მატარებელი ქალაქში", partOfSpeech: "არსებითი სახელი" },
+    "ქიმია": { definition: "მეცნიერება ნივთიერებათა შემადგენლობისა და გარდაქმნების შესახებ", partOfSpeech: "არსებითი სახელი" },
+    "ვაშლი": { definition: "მრგვალი, წითელი ან მწვანე ხილი", partOfSpeech: "არსებითი სახელი" },
+    "ღვინო": { definition: "ყურძნის წვენისგან დამზადებული ალკოჰოლური სასმელი", partOfSpeech: "არსებითი სახელი" },
+    "ცხენი": { definition: "ოთხფეხა ცხოველი, ადამიანი სვამს ზევით", partOfSpeech: "არსებითი სახელი" },
+    "ძაღლი": { definition: "შინაური ოთხფეხა ცხოველი, კაცის მეგობარი", partOfSpeech: "არსებითი სახელი" },
+    "ქვიშა": { definition: "მოყვითალო, წვრილი მინერალური ნარჩენები, სანაპიროზე გხვდება", partOfSpeech: "არსებითი სახელი" },
+    "სველი": { definition: "წყლით ან სხვა სითხით გაჟღენთილი", partOfSpeech: "ზედსართავი სახელი" },
+  },
+  en: {
+    "house": { definition: "a building for human habitation", partOfSpeech: "noun" },
+    "water": { definition: "a clear liquid essential for life", partOfSpeech: "noun" },
+    "world": { definition: "the earth and all its inhabitants", partOfSpeech: "noun" },
+    "apple": { definition: "a round fruit with red or green skin", partOfSpeech: "noun" },
+    "bread": { definition: "food made from flour and water", partOfSpeech: "noun" }
+  }
+};
+
 async function fetchDefinition(word, containerId) {
   const container = $(containerId);
-  container.innerHTML = '<div class="defLoading">Loading definition...</div>';
+  const loadingText = t('loadingDefinition') || 'Loading definition...';
+  container.innerHTML = `<div class="defLoading">${loadingText}</div>`;
 
-  try {
-    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word.toLowerCase()}`);
-    if (!response.ok) throw new Error("Definition not found");
-
-    const data = await response.json();
-    const entry = data[0];
-
-    let html = '<div class="defContent">';
-    html += `<div class="defWord">${entry.word}</div>`;
-    if (entry.phonetic) html += `<div class="defPronunciation">${entry.phonetic}</div>`;
-
-    if (entry.meanings && entry.meanings.length > 0) {
-      const meaning = entry.meanings[0];
-      html += '<div class="defMeaning">';
-      html += `<span class="defPartOfSpeech">${meaning.partOfSpeech}</span>`;
-
-      if (meaning.definitions && meaning.definitions.length > 0) {
-        const def = meaning.definitions[0];
-        html += `<div class="defDefinition">${def.definition}</div>`;
-        if (def.example) html += `<div class="defExample">"${def.example}"</div>`;
-      }
-      html += "</div>";
-    }
-
-    html += "</div>";
-    container.innerHTML = html;
-  } catch (error) {
-    container.innerHTML = `
-      <div class="defContent">
-        <div class="defDefinition">Definition not available for this word.</div>
-      </div>
-    `;
+  const currentLang = getCurrentLanguage();
+  
+  // Check local cache first
+  const cached = getCachedDefinition(word, currentLang);
+  if (cached) {
+    renderDefinition(container, cached);
+    return;
   }
+
+  // Check local definitions
+  const localDef = LOCAL_DEFINITIONS[currentLang]?.[word];
+  if (localDef) {
+    const data = { word: word, ...localDef, source: 'Local' };
+    setCachedDefinition(word, currentLang, data);
+    renderDefinition(container, data);
+    return;
+  }
+
+  // Try backend API first
+  try {
+    const response = await fetch(`/api/definitions?word=${encodeURIComponent(word)}&lang=${currentLang}`);
+    if (response.ok) {
+      const data = await response.json();
+      if (data.success) {
+        setCachedDefinition(word, currentLang, data);
+        renderDefinition(container, data);
+        return;
+      }
+    }
+  } catch (_) {
+    // Backend not available — fall through to free dictionary API
+  }
+
+  // For English words: try Free Dictionary API (no key required, works client-side)
+  if (currentLang === 'en') {
+    try {
+      const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word.toLowerCase())}`);
+      if (dictRes.ok) {
+        const dictData = await dictRes.json();
+        const entry = Array.isArray(dictData) && dictData[0];
+        if (entry) {
+          const meaning = entry.meanings?.[0];
+          const defObj = meaning?.definitions?.[0];
+          const data = {
+            word: entry.word || word,
+            phonetic: entry.phonetic || entry.phonetics?.find(p => p.text)?.text || null,
+            partOfSpeech: meaning?.partOfSpeech || 'noun',
+            definition: defObj?.definition || null,
+            example: defObj?.example || null,
+            source: 'Dictionary'
+          };
+          setCachedDefinition(word, currentLang, data);
+          renderDefinition(container, data);
+          return;
+        }
+      }
+    } catch (_) {
+      // Dictionary API unavailable — fall through to Georgian Wiktionary / final fallback
+    }
+  }
+
+  // For Georgian words: try Wiktionary client-side
+  if (currentLang === 'ka') {
+    try {
+      const wikiUrl = `https://ka.wiktionary.org/w/api.php?action=query&titles=${encodeURIComponent(word)}&prop=extracts&exintro=true&exsentences=2&explaintext=true&format=json&origin=*`;
+      const wikiRes = await fetch(wikiUrl);
+      if (wikiRes.ok) {
+        const wikiData = await wikiRes.json();
+        const pages = wikiData?.query?.pages || {};
+        const pageId = Object.keys(pages)[0];
+        if (pageId && pageId !== '-1') {
+          const extract = pages[pageId].extract || '';
+          const sentences = extract.split(/[.!?]/).filter(s => s.trim());
+          const data = {
+            word: word,
+            definition: sentences[0]?.trim() || extract.substring(0, 200),
+            partOfSpeech: 'სახელი',
+            example: sentences[1]?.trim() || null,
+            source: 'Wiktionary'
+          };
+          setCachedDefinition(word, currentLang, data);
+          renderDefinition(container, data);
+          return;
+        }
+      }
+    } catch (_) {
+      // Wiktionary unavailable
+    }
+  }
+
+  // Final fallback — generic message
+  const fallbackData = {
+    word: word,
+    definition: currentLang === 'ka'
+      ? `ქართული სიტყვა - ${word.length} ასო`
+      : `No definition found for this word.`,
+    partOfSpeech: currentLang === 'ka' ? 'სახელი' : 'noun',
+    source: 'Fallback'
+  };
+  renderDefinition(container, fallbackData);
+}
+
+function renderDefinition(container, data) {
+  let html = '<div class="defContent">';
+  html += `<div class="defWord">${data.word}</div>`;
+  
+  if (data.phonetic) {
+    html += `<div class="defPronunciation">${data.phonetic}</div>`;
+  }
+
+  if (data.definition) {
+    html += '<div class="defMeaning">';
+    if (data.partOfSpeech) {
+      html += `<span class="defPartOfSpeech">${data.partOfSpeech}</span>`;
+    }
+    html += `<div class="defDefinition">${data.definition}</div>`;
+    if (data.example) {
+      html += `<div class="defExample">"${data.example}"</div>`;
+    }
+    html += "</div>";
+  }
+
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 // ===== STATS =====
@@ -633,9 +850,309 @@ function shareResults() {
   );
 }
 
+// ===== AUTH INTEGRATION =====
+
+function renderAvatar(el, user) {
+  if (!el || !user) return;
+  const [c1, c2] = [user.avatarColor1 || '#10b981', user.avatarColor2 || '#059669'];
+  el.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+  el.textContent = Auth.getInitials(user.name);
+}
+
+function showProfilePill(user) {
+  const pill = $('profilePill');
+  if (!pill) return;
+  pill.style.display = 'flex';
+  renderAvatar($('profileAvatar'), user);
+  $('profileName').textContent = user.name;
+  $('profileBadge').textContent = user.isGuest
+    ? (t('guest') || 'Guest')
+    : (t('registeredUser') || 'Member');
+}
+
+function initAuthScreen() {
+  const authScreen = $('authScreen');
+  const modeSelector = $('modeSelector');
+  if (!authScreen) return;
+
+  const user = Auth.currentUser();
+  if (user) {
+    authScreen.style.display = 'none';
+    modeSelector.style.display = '';
+    showProfilePill(user);
+    updateUserMenu(user);
+    return;
+  }
+
+  authScreen.style.display = 'flex';
+  modeSelector.style.display = 'none';
+
+  // Tabs
+  $('tabLogin').addEventListener('click', () => {
+    $('tabLogin').classList.add('active');
+    $('tabRegister').classList.remove('active');
+    $('panelLogin').style.display = '';
+    $('panelRegister').style.display = 'none';
+  });
+  $('tabRegister').addEventListener('click', () => {
+    $('tabRegister').classList.add('active');
+    $('tabLogin').classList.remove('active');
+    $('panelRegister').style.display = '';
+    $('panelLogin').style.display = 'none';
+  });
+
+  // Eye toggles
+  $('loginEye').addEventListener('click', () => {
+    const inp = $('loginPassword');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  });
+  $('regEye').addEventListener('click', () => {
+    const inp = $('regPassword');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  });
+
+  // Login
+  $('loginBtn').addEventListener('click', async () => {
+    $('loginError').textContent = '';
+    $('loginBtn').disabled = true;
+    const result = await Auth.login({
+      email: $('loginEmail').value,
+      password: $('loginPassword').value,
+    });
+    $('loginBtn').disabled = false;
+    if (!result.ok) { $('loginError').textContent = result.error; return; }
+    onAuthSuccess(result.user);
+  });
+
+  // Register - step 1: send verification code
+  $('registerBtn').addEventListener('click', async () => {
+    $('regError').textContent = '';
+    $('registerBtn').disabled = true;
+    const result = await Auth.registerStart({
+      name: $('regName').value,
+      email: $('regEmail').value,
+      password: $('regPassword').value,
+    });
+    $('registerBtn').disabled = false;
+    if (!result.ok) { $('regError').textContent = result.error; return; }
+
+    // Show verification panel - code was sent to email only
+    $('panelRegister').style.display = 'none';
+    $('panelVerify').style.display = '';
+    $('verifyEmailHint').textContent = `კოდი გამოგზავნილია: ${$('regEmail').value}`;
+  });
+
+  // Register - step 2: verify code
+  $('verifyBtn').addEventListener('click', async () => {
+    $('verifyError').textContent = '';
+    $('verifyBtn').disabled = true;
+    const code = $('verifyCodeInput').value.trim();
+    const result = await Auth.registerVerify(code);
+    $('verifyBtn').disabled = false;
+    if (!result.ok) { $('verifyError').textContent = result.error; return; }
+    onAuthSuccess(result.user);
+  });
+
+  // Back from verify to register
+  $('backToRegisterBtn').addEventListener('click', () => {
+    $('panelVerify').style.display = 'none';
+    $('panelRegister').style.display = '';
+    $('verifyError').textContent = '';
+    $('verifyCodeInput').value = '';
+  });
+
+  // Guest
+  $('guestBtn').addEventListener('click', () => {
+    const result = Auth.loginAsGuest($('guestName').value);
+    onAuthSuccess(result.user);
+  });
+
+  // Enter key
+  [$('loginEmail'), $('loginPassword')].forEach(el => {
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') $('loginBtn').click(); });
+  });
+  [$('regName'), $('regEmail'), $('regPassword')].forEach(el => {
+    el.addEventListener('keydown', e => { if (e.key === 'Enter') $('registerBtn').click(); });
+  });
+  $('verifyCodeInput').addEventListener('keydown', e => { if (e.key === 'Enter') $('verifyBtn').click(); });
+}
+
+function onAuthSuccess(user) {
+  $('authScreen').style.display = 'none';
+  $('modeSelector').style.display = '';
+  showProfilePill(user);
+  updateStatsPreview(loadStats());
+  updateUserMenu(user);
+}
+
+function initProfileControls() {
+  const menuBtn = $('profileMenuBtn');
+  const dropdown = $('profileDropdown');
+
+  // Profile pill dropdown (registered users)
+  if (menuBtn && dropdown) {
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = dropdown.style.display === 'block';
+      dropdown.style.display = open ? 'none' : 'block';
+    });
+    document.addEventListener('click', () => { if (dropdown) dropdown.style.display = 'none'; });
+  }
+
+  // Shared logout function (works for both guest and registered)
+  function doLogout() {
+    Auth.logout();
+    // Hide everything
+    if (dropdown) dropdown.style.display = 'none';
+    const userDD = $('userDropdown');
+    if (userDD) userDD.style.display = 'none';
+    const pill = $('profilePill');
+    if (pill) pill.style.display = 'none';
+    $('modeSelector').style.display = 'none';
+    // Reset auth screen to login tab
+    $('authScreen').style.display = 'flex';
+    $('tabLogin').classList.add('active');
+    $('tabRegister').classList.remove('active');
+    $('panelLogin').style.display = '';
+    $('panelRegister').style.display = 'none';
+    $('panelVerify').style.display = 'none';
+    // Reset user dropdown state
+    const userMenuGuest = $('userMenuGuest');
+    const userMenuLogged = $('userMenuLogged');
+    if (userMenuGuest) userMenuGuest.style.display = '';
+    if (userMenuLogged) userMenuLogged.style.display = 'none';
+  }
+
+  // Profile pill logout button
+  const logoutBtn = $('logoutBtn');
+  if (logoutBtn) logoutBtn.addEventListener('click', doLogout);
+
+  // User button dropdown (top of mode selector)
+  const userBtn = $('userBtn');
+  const userDropdown = $('userDropdown');
+  if (userBtn && userDropdown) {
+    userBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = userDropdown.style.display === 'block';
+      userDropdown.style.display = open ? 'none' : 'block';
+    });
+    document.addEventListener('click', () => { if (userDropdown) userDropdown.style.display = 'none'; });
+
+    // Menu items
+    const menuLoginBtn = $('menuLoginBtn');
+    const menuRegisterBtn = $('menuRegisterBtn');
+    const menuGuestBtn = $('menuGuestBtn');
+    const menuLogoutBtn = $('menuLogoutBtn');
+    const menuEditProfileBtn = $('menuEditProfileBtn');
+
+    if (menuLoginBtn) menuLoginBtn.addEventListener('click', () => {
+      userDropdown.style.display = 'none';
+      $('modeSelector').style.display = 'none';
+      $('authScreen').style.display = 'flex';
+      $('tabLogin').classList.add('active');
+      $('tabRegister').classList.remove('active');
+      $('panelLogin').style.display = '';
+      $('panelRegister').style.display = 'none';
+      $('panelVerify').style.display = 'none';
+    });
+
+    if (menuRegisterBtn) menuRegisterBtn.addEventListener('click', () => {
+      userDropdown.style.display = 'none';
+      $('modeSelector').style.display = 'none';
+      $('authScreen').style.display = 'flex';
+      $('tabRegister').classList.add('active');
+      $('tabLogin').classList.remove('active');
+      $('panelRegister').style.display = '';
+      $('panelLogin').style.display = 'none';
+      $('panelVerify').style.display = 'none';
+    });
+
+    if (menuGuestBtn) menuGuestBtn.addEventListener('click', () => {
+      userDropdown.style.display = 'none';
+      const result = Auth.loginAsGuest('');
+      onAuthSuccess(result.user);
+      updateUserMenu(result.user);
+    });
+
+    if (menuLogoutBtn) menuLogoutBtn.addEventListener('click', doLogout);
+
+    if (menuEditProfileBtn) menuEditProfileBtn.addEventListener('click', () => {
+      userDropdown.style.display = 'none';
+      openEditProfile();
+    });
+  }
+
+  const editProfileBtn = $('editProfileBtn');
+  if (editProfileBtn) editProfileBtn.addEventListener('click', () => {
+    if (dropdown) dropdown.style.display = 'none';
+    openEditProfile();
+  });
+}
+
+// Update user dropdown UI based on current session
+function updateUserMenu(user) {
+  const userMenuGuest = $('userMenuGuest');
+  const userMenuLogged = $('userMenuLogged');
+  const menuAvatar = $('menuAvatar');
+  const menuUserName = $('menuUserName');
+  const menuUserStatus = $('menuUserStatus');
+
+  if (!userMenuGuest || !userMenuLogged) return;
+
+  if (user) {
+    userMenuGuest.style.display = 'none';
+    userMenuLogged.style.display = '';
+    if (menuAvatar) renderAvatar(menuAvatar, user);
+    if (menuUserName) menuUserName.textContent = user.name;
+    if (menuUserStatus) menuUserStatus.textContent = user.isGuest ? '👤 სტუმარი' : '✓ Member';
+  } else {
+    userMenuGuest.style.display = '';
+    userMenuLogged.style.display = 'none';
+  }
+}
+
+function openEditProfile() {
+  const user = Auth.currentUser();
+  if (!user) return;
+  const modal = $('editProfileModal');
+  $('editName').value = user.name;
+  $('editProfileError').textContent = '';
+  renderAvatar($('editProfileAvatar'), user);
+  modal.hidden = false;
+
+  $('editName').addEventListener('input', () => {
+    const preview = $('editProfileAvatar');
+    const fakeName = $('editName').value || user.name;
+    const [c1, c2] = Auth.avatarColors(fakeName);
+    preview.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+    preview.textContent = Auth.getInitials(fakeName);
+  });
+
+  $('closeEditProfileBtn').onclick = () => { modal.hidden = true; };
+  $('saveProfileBtn').onclick = async () => {
+    $('editProfileError').textContent = '';
+    $('saveProfileBtn').disabled = true;
+    const result = await Auth.updateProfile({ name: $('editName').value });
+    $('saveProfileBtn').disabled = false;
+    if (!result.ok) { $('editProfileError').textContent = result.error; return; }
+    showProfilePill(result.user);
+    modal.hidden = true;
+    toast('Profile updated!');
+  };
+}
+
 // ===== INITIALIZATION =====
 function init() {
+  initAuthScreen();
+  initProfileControls();
   initModeSelector();
+  
+  // Listen for language changes to rebuild keyboard
+  window.addEventListener('languageChanged', () => {
+    if (state.mode) {
+      buildKeyboard();
+    }
+  });
 }
 
 if (document.readyState === "loading") {
@@ -660,7 +1177,8 @@ document.head.appendChild(style);
 // ========================================
 async function handleQuickMatch() {
   console.log("Quick Match button clicked!");
-  const name = localStorage.getItem("playerName") || "Player";
+  const user = Auth.currentUser();
+  const name = (user && user.name) || localStorage.getItem("playerName") || "Player";
   toast(t("lookingForMatch") || "Looking for a match...", 3000);
 
   try {

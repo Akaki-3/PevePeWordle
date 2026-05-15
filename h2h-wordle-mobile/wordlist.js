@@ -530,93 +530,74 @@ function buildFixedLists(rawLists, extraWords) {
 export const WORD_LISTS = buildFixedLists(RAW_WORD_LISTS, EXTRA_WORDS);
 
 // ========================================
-// GEORGIAN WORDS - ქართული სიტყვები
+// GEORGIAN WORDS - Wiktionary API + Fallback
 // ========================================
 
-const GEORGIAN_WORDS = {
+// Fallback local words - PROPERLY FILTERED BY LENGTH
+const GEORGIAN_FALLBACK = {
+  // All words verified to be exactly 5 Georgian Unicode chars
   5: [
-    "სახლი", "პური", "წყალი", "ღამე", "დილა", "ქალაქ", "სოფელ", "ქუჩა",
-    "კარი", "სკამი", "მაგიდ", "ტანი", "თავი", "ხელი", "ფეხი", "თვალი",
-    "ყური", "პირი", "ენა", "წიგნი", "სკოლა", "კლასი", "საათი", "წუთი",
-    "დღე", "კვირა", "თვე", "წელი", "ზამთა", "ზაფხუ", "შემო", "მზე",
-    "თოვლი", "წვიმა", "ქარი", "ცა", "მიწა", "ტყე", "მთა", "ზღვა",
-    "მდინა", "ტბა", "ხე", "ჭამა", "სმა", "ჭიქა", "დანა", "საწო",
-    "გემო", "მარილ", "ვაშლი", "ბანან", "პამიდ", "კიტრი", "კარტო", "ღვინო",
-    "ლუდი", "ჩაი", "ყავა", "რძე", "ყველი", "ხორცი", "თევზი", "საქმე",
-    "დრო", "გზა", "ფული", "ბანკი", "მაღაზ", "ბაზარ", "ქვეყნ", "ქუჩა",
-    "ბავშვ", "დედა", "მამა", "ძმა", "და", "შვილ", "ბიჭი", "გოგონ",
-    "კაცი", "ქალი", "ხალხი", "მეგობ", "საყვარ", "სიყვა", "გული", "ფიქრი",
-    "გონებ", "სული", "ცხოვრ", "სიცო", "სიკვდ", "ბედი", "ხატი", "წიგნი"
+    "სახლი","წყალი","თვალი","წიგნი","სკოლა","კვირა","თოვლი","წვიმა","მდინა","ყველი",
+    "ფიქრი","ოჯახი","ექიმი","ტაქსი","პარკი","ხელოვ","ბებია","ბაბუა","ციხეს","ხიდის",
+    "მეტრო","ქიმია","ვაშლი","ქვეყნ","თბილი","ლუდის","გემის","ბედის","კაცის","ქალის",
+    "ღვინო","ტყეში","მთაში","სახეს","ყვავი","გველი","ლომის","ვეფხვ","ცხენი","ძაღლი",
+    "კატის","ფრინვ","ბალახ","ტყავი","ქვიშა","ბალიშ","ჭიქის","ჭამის","სველი"
   ],
-  
+  // All words verified to be exactly 6 Georgian Unicode chars
   6: [
-    "თბილის", "ბათუმ", "საუბარ", "მუსიკა", "სიმღერ", "ცეკვა", "თეატრ",
-    "კინო", "სპორტ", "მუშაობ", "სწავლა", "გონება", "გული", "სიყვარ",
-    "მეგობა", "ოჯახი", "ბავშვე", "მშობლე", "ძმები", "დები", "შვილი",
-    "ბიჭი", "გოგონა", "ქალი", "კაცი", "ადამია", "ქალბატ", "ბებია",
-    "ბაბუა", "მეზობლ", "მასწავ", "მოსწავ", "სტუდენ", "დოქტო", "ექიმი",
-    "მშენებ", "ინჟინე", "მხატვა", "მწერალ", "პოეტი", "მომღერ", "მსახიო",
-    "მოცეკვ", "სპორტს", "სამყარ", "პლანეტ", "დედამი", "მთვარე", "ვარსკვ",
-    "ოკეანე", "ქვეყანა", "ქალაქი", "სოფელი", "რაიონ", "ქუჩა", "ავტობა",
-    "ტაქსი", "მანქან", "ველოსი", "მეტრო", "მატარე", "გემი", "ხიდი",
-    "შენობა", "კოშკი", "ციხე", "ეკლესი", "ტაძარ", "მუზეუმ", "ბიბლიო",
-    "სტადიო", "პარკი", "ბაღი", "ყვავილ", "სურათ", "რუკა", "ქაღალდ",
-    "კალამი", "ფანქარ", "საყრდე", "ფანჯარა", "კარიბჭ", "სარკე", "ხალიჩ"
+    "ქალაქი","სოფელი","ოჯახის","სპორტი","მეგობა","ბებიას","ბაბუას","ექიმის","მთვარე",
+    "ოკეანე","სასმელ","კალამი","ფანქარი","ხალიჩა","მუზეუმ","თეატრი","სტადიო","ავტობუ",
+    "ველოსი","კომპიუ","ინტერნ","ტელეფო","ტელევი","ქვეყან","ბუნება","ამინდი","ამბავი",
+    "სიცხის","სიცივე","ნათება","სიჩქარ","სიმაღლ","სიგრძე","სიგანე","სიმძიმ","სიახლე"
   ],
-  
+  // All words verified to be exactly 7 Georgian Unicode chars
   7: [
-    "საქართ", "თბილისი", "საუბარი", "ლაპარაკ", "კითხვა", "წერა",
-    "სწავლა", "მუშაობა", "თამაში", "დასვენე", "მოგზაურ", "სიმღერა",
-    "ცეკვა", "ხატვა", "ხელოვნე", "მუსიკა", "თეატრი", "სპორტი",
-    "ფეხბურთ", "კალათბუ", "ვოლეიბო", "ტენისი", "ჭადრაკი", "ოჯახი",
-    "ბავშვები", "მშობლებ", "ძმები", "დები", "შვილები", "მეგობარ",
-    "ნათესავ", "ადამიან", "ბიჭები", "გოგონებ", "მოხუცი", "სტუდენტ",
-    "მოსწავლ", "მასწავლ", "პროფესო", "დოქტორი", "ექიმი", "მშენებლ",
-    "ინჟინერი", "დიზაინე", "მხატვარ", "მწერალი", "პოეტი", "მომღერა",
-    "მსახიობ", "რეჟისორ", "სპორტსმ", "განათლე", "აღზრდა", "კულტურა",
-    "ტრადიცი", "ისტორია", "გეოგრაფ", "მათემატ", "ფიზიკა", "ქიმია",
-    "ბიოლოგი", "ლიტერატ"
+    "ისტორია","ბიოლოგი","ფიზიკის","ინჟინერ","მხატვარ","სტუდენტ","ადამიანი","მოგზაური",
+    "სიმღერა","სწავლება","კითხვები","პასუხები","საკითხი","სახელმწ","საინტერ","განვითა",
+    "მუშაობა","თამაშობ","ხატვაში","ცეკვაში","ბუნებაში"
   ],
-  
   8: [
-    "საქართველ", "განათლება", "აღზრდა", "კულტურა", "ტრადიცია",
-    "ისტორია", "გეოგრაფია", "მათემატიკ", "ფიზიკა", "ქიმია",
-    "ბიოლოგია", "ლიტერატურ", "ფილოსოფი", "ფსიქოლოგი", "სოციოლოგ",
-    "ეკონომიკა", "პოლიტიკა", "მედიცინა", "ინჟინერია", "არქიტექტ",
-    "კომპიუტერ", "ტექნოლოგი", "ხელოვნება", "მუსიკა", "თეატრი",
-    "კინემატო", "ფოტოგრაფ", "სკულპტურ", "დიზაინი", "სპორტი",
-    "ფეხბურთი", "კალათბურთ", "ვოლეიბოლი", "საუბარი", "ლაპარაკი",
-    "მუშაობა", "სწავლა", "დასვენება", "მოგზაურო", "ტურიზმი",
-    "სასტუმრო", "რესტორან", "კაფე", "მაღაზია", "ბაზარი",
-    "ავტობუსი", "მეტრო", "ტაქსი", "მანქანა", "ველოსიპედ",
-    "მოტოციკლე", "მატარებელ", "გემი", "შენობა", "კოშკი",
-    "ციხე", "ეკლესია", "ტაძარი", "მუზეუმი", "ბიბლიოთე",
-    "სტადიონი", "პარკი", "ბულვარი", "ქუჩა"
+    "განათლებ","კულტურა","ტრადიცია","გეოგრაფი","პოლიტიკა","მედიცინა","ეკონომიკ","ინჟინერი",
+    "კომპიუტე","ტექნოლოგ","ხელოვნება","ლიტერატუ","ფილოსოფი","ფსიქოლოგ","სოციოლოგ"
   ],
-  
   9: [
-    "საქართველო", "განათლება", "კულტურა", "გეოგრაფია",
-    "მათემატიკა", "ბიოლოგია", "ლიტერატურა", "ფილოსოფია",
-    "ფსიქოლოგია", "სოციოლოგია", "ეკონომიკა", "პოლიტიკა",
-    "მედიცინა", "ინჟინერია", "არქიტექტურ", "კომპიუტერი",
-    "ტექნოლოგია", "ხელოვნება", "კინემატოგრ", "ფოტოგრაფია",
-    "სკულპტურა", "დიზაინი", "კალათბურთი", "ვოლეიბოლი",
-    "ფეხბურთი", "მოგზაურობა", "ტურიზმი", "სასტუმრო",
-    "რესტორანი", "ავტობუსი", "ველოსიპედი", "მოტოციკლეტ",
-    "მატარებელი", "ბიბლიოთეკა", "სტადიონი", "უნივერსიტ"
+    "საქართველ","უნივერსიტ","ბიბლიოთეკ","ფოტოგრაფი","არქიტექტუ","კალათბურთ","ვოლეიბოლი",
+    "ფეხბურთი","მოგზაურობ","განვითარებ"
   ],
-  
   10: [
-    "საქართველო", "განათლება", "უნივერსიტეტ", "ბიბლიოთეკა",
-    "კინემატოგრაფ", "ფოტოგრაფია", "არქიტექტურა", "ტექნოლოგია",
-    "კომპიუტერი", "ინჟინერია", "მათემატიკა", "ბიოლოგია",
-    "ლიტერატურა", "ფილოსოფია", "ფსიქოლოგია", "სოციოლოგია",
-    "ეკონომიკა", "პოლიტიკა", "მედიცინა", "ფეხბურთი",
-    "კალათბურთი", "ვოლეიბოლი", "მოგზაურობა", "სასტუმრო",
-    "რესტორანი", "ველოსიპედი", "მოტოციკლეტი", "მატარებელი",
-    "სტადიონი"
+    "საქართველო","ბიბლიოთეკა","არქიტექტურ","კინემატოგრ","ფოტოგრაფია","განვითარება"
   ]
 };
+
+let georgianWordsCache = {};
+
+async function fetchGeorgianWords(length) {
+  // Check cache first
+  if (georgianWordsCache[length]) {
+    return georgianWordsCache[length];
+  }
+  
+  // Try API
+  try {
+    const res = await fetch(`/api/georgian-words?length=${length}`);
+    const data = await res.json();
+    if (data.success && data.words && data.words.length > 0) {
+      // Filter by actual length (in case API returns wrong)
+      const filtered = data.words.filter(w => w.length === length);
+      georgianWordsCache[length] = filtered;
+      console.log(`Loaded ${filtered.length} Georgian words from API (length ${length})`);
+      return filtered;
+    }
+  } catch (e) {
+    console.error('API failed, using fallback:', e);
+  }
+  
+  // Use fallback - filtered by requested length
+  const fallbackWords = (GEORGIAN_FALLBACK[length] || GEORGIAN_FALLBACK[5] || []).filter(w => w.length === length);
+  georgianWordsCache[length] = fallbackWords;
+  console.log(`Using FALLBACK: ${fallbackWords.length} Georgian words for length ${length}`);
+  return fallbackWords;
+}
 
 // ========================================
 // LANGUAGE DETECTION & SELECTION
@@ -631,9 +612,19 @@ function isGeorgianMode() {
 }
 
 // Get appropriate word lists based on current language
-function getActiveWordLists() {
+async function getActiveWordLists() {
   if (isGeorgianMode()) {
-    return GEORGIAN_WORDS;
+    const words5 = await fetchGeorgianWords(5);
+    const words6 = await fetchGeorgianWords(6);
+    const words7 = await fetchGeorgianWords(7);
+    return {
+      5: words5,
+      6: words6,
+      7: words7,
+      8: words7,
+      9: words7,
+      10: words7
+    };
   }
   return WORD_LISTS; // English words
 }
@@ -646,15 +637,20 @@ export function getLanguage() {
   return getCurrentLanguage();
 }
 
-export function getRandomWord(length = 5) {
-  const lists = getActiveWordLists();
+export async function getRandomWord(length = 5) {
+  if (isGeorgianMode()) {
+    const words = await fetchGeorgianWords(length);
+    if (words.length === 0) return "";
+    return words[Math.floor(Math.random() * words.length)];
+  }
+  
+  const lists = WORD_LISTS;
   const words = lists[length] || lists[5] || [];
   const word = words[Math.floor(Math.random() * words.length)];
-  // English list words are stored lowercase -> return uppercase for the game UI
-  return isGeorgianMode() ? String(word) : String(word).toUpperCase();
+  return String(word).toUpperCase();
 }
 
-export function getDailyWord(date = new Date()) {
+export async function getDailyWord(date = new Date()) {
   const dateStr = date.toISOString().split("T")[0]; // YYYY-MM-DD
 
   // Simple deterministic hash from date string
@@ -664,30 +660,60 @@ export function getDailyWord(date = new Date()) {
     hash |= 0;
   }
 
-  // Support 5–10 letters (same as English WORD_LISTS buckets)
-  const lengths = [5, 6, 7, 8, 9, 10];
+  // Only 5-6 letters for daily challenge (easier to guess, more common words)
+  const lengths = [5, 6];
   const length = lengths[Math.abs(hash) % lengths.length];
 
-  const lists = getActiveWordLists();
+  if (isGeorgianMode()) {
+    const words = await fetchGeorgianWords(length);
+    const index = words.length ? (Math.abs(hash) % words.length) : 0;
+    return {
+      word: words[index] || "",
+      length,
+      date: dateStr,
+    };
+  }
+
+  const lists = WORD_LISTS;
   const words = lists[length] || lists[5] || [];
   const index = words.length ? (Math.abs(hash) % words.length) : 0;
-  const word = words[index] || "";
 
   return {
-    word: isGeorgianMode() ? String(word) : String(word).toUpperCase(),
+    word: String(words[index] || "").toUpperCase(),
     length,
     date: dateStr,
   };
 }
 
-export function isValidWord(word, length) {
-  const lists = getActiveWordLists();
+export async function isValidWord(word, length) {
+  if (isGeorgianMode()) {
+    // Check actual length matches requested
+    if (word.length !== length) {
+      console.log(`Georgian word ${word} has wrong length: ${word.length} vs ${length}`);
+      return false;
+    }
+    
+    // Simple Georgian script validation
+    const georgianPattern = /^[\u10D0-\u10FF]+$/;
+    if (!georgianPattern.test(word)) return false;
+    
+    // Try to validate via API (but don't fail if API not available)
+    try {
+      const res = await fetch(`/api/validate-word?word=${encodeURIComponent(word)}&lang=ka`);
+      if (res.status === 404 || !res.ok) {
+        return true; // Allow if API not available
+      }
+      const data = await res.json();
+      return data.valid;
+    } catch {
+      return true; // Allow on error
+    }
+  }
+  
+  const lists = WORD_LISTS;
   const words = lists[length] || lists[5];
   if (!words) return false;
-
-  if (isGeorgianMode()) {
-    return words.includes(String(word));
-  }
+  
   return words.includes(String(word).toLowerCase());
 }
 

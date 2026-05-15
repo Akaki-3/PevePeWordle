@@ -193,7 +193,7 @@ async function submitTyped() {
 function getKeyboardRows() {
   const lang = currentLang();
   if (lang === "ka") {
-    return ["ქწერტყუიოპ", "ასდფგჰჯკლ", "ზხცვბნმ"];
+    return ["ქწერტყუიოპ", "ასდფგჰჯკლ", "ზხცვბნმხ"];
   }
   return ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
 }
