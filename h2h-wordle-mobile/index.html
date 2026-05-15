@@ -18,6 +18,206 @@
     />
     <meta name="apple-mobile-web-app-title" content="PVP სიტყვური" />
     <link rel="stylesheet" href="singleplayer.css" />
+    <style>
+      /* ── EDIT PROFILE MODAL ── */
+      .editProfileOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(6px);
+        z-index: 3000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .editProfileCard {
+        background: #1e293b;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
+        padding: 28px 24px;
+        width: 100%;
+        max-width: 380px;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+      }
+      .editProfileHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+      }
+      .editProfileHeader h2 {
+        font-size: 18px;
+        font-weight: 800;
+        color: #f9fafb;
+      }
+      .editProfileCloseBtn {
+        background: none;
+        border: none;
+        color: #9ca3af;
+        font-size: 20px;
+        cursor: pointer;
+        line-height: 1;
+        padding: 4px;
+      }
+      /* Avatar picker */
+      .avatarPickerSection {
+        margin-bottom: 24px;
+        text-align: center;
+      }
+      .avatarPickerLabel {
+        font-size: 12px;
+        font-weight: 700;
+        color: #9ca3af;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 14px;
+      }
+      .avatarPreviewLarge {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        font-weight: 900;
+        color: #fff;
+        margin: 0 auto 16px;
+        border: 3px solid rgba(255, 255, 255, 0.15);
+        position: relative;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .avatarPreviewLarge:hover {
+        transform: scale(1.05);
+      }
+      .avatarPreviewLarge .avatarEditHint {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .avatarPreviewLarge:hover .avatarEditHint {
+        opacity: 1;
+      }
+      .emojiGrid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+        max-height: 160px;
+        overflow-y: auto;
+        padding: 4px;
+      }
+      .emojiOption {
+        width: 100%;
+        aspect-ratio: 1;
+        background: rgba(255, 255, 255, 0.06);
+        border: 2px solid transparent;
+        border-radius: 10px;
+        font-size: 22px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+      }
+      .emojiOption:hover {
+        background: rgba(255, 255, 255, 0.12);
+        transform: scale(1.1);
+      }
+      .emojiOption.selected {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.15);
+      }
+      /* Color swatches */
+      .colorSwatches {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 12px;
+        flex-wrap: wrap;
+      }
+      .colorSwatch {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: transform 0.15s;
+      }
+      .colorSwatch:hover {
+        transform: scale(1.2);
+      }
+      .colorSwatch.selected {
+        border-color: #fff;
+        transform: scale(1.2);
+      }
+      /* Username field */
+      .editProfileField {
+        margin-bottom: 20px;
+      }
+      .editProfileField label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #9ca3af;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+      .editProfileField input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1.5px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        padding: 12px 14px;
+        color: #f9fafb;
+        font-size: 15px;
+        font-weight: 600;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .editProfileField input:focus {
+        border-color: #10b981;
+      }
+      .editProfileError {
+        color: #ef4444;
+        font-size: 13px;
+        margin-bottom: 14px;
+        min-height: 18px;
+      }
+      .editProfileSaveBtn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border: none;
+        border-radius: 14px;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+        transition:
+          opacity 0.2s,
+          transform 0.1s;
+      }
+      .editProfileSaveBtn:hover {
+        opacity: 0.9;
+      }
+      .editProfileSaveBtn:active {
+        transform: scale(0.98);
+      }
+      .editProfileSaveBtn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    </style>
   </head>
   <body>
     <!-- AD PLACEHOLDER TOP (hidden by default) -->
@@ -277,7 +477,7 @@
           </div>
         </div>
 
-        <!-- USER PROFILE PILL -->
+        <!-- USER PROFILE PILL (shown when logged in) -->
         <div class="profilePill" id="profilePill" style="display: none">
           <div class="profileAvatar" id="profileAvatar"></div>
           <div class="profileInfo">
@@ -285,24 +485,28 @@
             <div class="profileBadge" id="profileBadge"></div>
           </div>
           <button class="profileMenuBtn" id="profileMenuBtn">⋯</button>
-        </div>
 
-        <!-- PROFILE DROPDOWN -->
-        <div class="profileDropdown" id="profileDropdown" style="display: none">
-          <button
-            class="profileDropItem"
-            id="editProfileBtn"
-            data-i18n="editProfile"
+          <!-- PROFILE DROPDOWN — inside pill so position:absolute works correctly -->
+          <div
+            class="profileDropdown"
+            id="profileDropdown"
+            style="display: none"
           >
-            ✏️ Edit Profile
-          </button>
-          <button
-            class="profileDropItem danger"
-            id="logoutBtn"
-            data-i18n="signOut"
-          >
-            🚪 Sign Out
-          </button>
+            <button
+              class="profileDropItem"
+              id="editProfileBtn"
+              data-i18n="editProfile"
+            >
+              ✏️ Edit Profile
+            </button>
+            <button
+              class="profileDropItem danger"
+              id="logoutBtn"
+              data-i18n="signOut"
+            >
+              🚪 Sign Out
+            </button>
+          </div>
         </div>
 
         <div class="logo">
@@ -661,6 +865,51 @@
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════
+         EDIT PROFILE MODAL
+    ════════════════════════════════════════════════════════════ -->
+    <div class="editProfileOverlay" id="editProfileModal" style="display: none">
+      <div class="editProfileCard">
+        <div class="editProfileHeader">
+          <h2>✏️ Edit Profile</h2>
+          <button class="editProfileCloseBtn" id="editProfileCloseBtn">
+            ✕
+          </button>
+        </div>
+
+        <!-- Avatar preview + picker -->
+        <div class="avatarPickerSection">
+          <div class="avatarPickerLabel">Profile Picture</div>
+          <div class="avatarPreviewLarge" id="editAvatarPreview">
+            <span class="avatarEditHint">✏️</span>
+          </div>
+
+          <!-- Emoji grid -->
+          <div class="emojiGrid" id="emojiGrid"></div>
+
+          <!-- Color swatches -->
+          <div class="colorSwatches" id="colorSwatches"></div>
+        </div>
+
+        <!-- Username field -->
+        <div class="editProfileField">
+          <label>Display Name</label>
+          <input
+            type="text"
+            id="editNameInput"
+            maxlength="24"
+            placeholder="Your name"
+          />
+        </div>
+
+        <div class="editProfileError" id="editProfileError"></div>
+
+        <button class="editProfileSaveBtn" id="editProfileSaveBtn">
+          Save Changes
+        </button>
+      </div>
+    </div>
+
     <!-- TOAST NOTIFICATIONS -->
     <div class="toast" id="toast" hidden></div>
 
@@ -675,19 +924,17 @@
     <script type="module" src="singleplayer.js"></script>
 
     <script>
-      // Language switcher functionality
       document.addEventListener("DOMContentLoaded", () => {
+        // ── LANGUAGE SWITCHER ──
         const langKa = document.getElementById("langKa");
         const langEn = document.getElementById("langEn");
 
-        // Set active language on load
         const currentLang = getCurrentLanguage();
         if (currentLang === "en") {
           langKa.classList.remove("active");
           langEn.classList.add("active");
         }
 
-        // Language switch handlers
         langKa.addEventListener("click", () => {
           setLanguage("ka");
           langKa.classList.add("active");
@@ -700,35 +947,63 @@
           langKa.classList.remove("active");
         });
 
-        // Initial translation
         updateAllTexts();
 
-        // Auth initialization
+        // ── AUTH INIT ──
         const user = Auth.currentUser();
         if (!user) {
           document.getElementById("authScreen").style.display = "flex";
           document.getElementById("modeSelector").style.display = "none";
         } else {
-          document.getElementById("profilePill").style.display = "flex";
-          document.getElementById("profileName").textContent = user.name;
-          document.getElementById("profileBadge").textContent = user.isGuest
+          refreshProfileUI(user);
+        }
+
+        // ── HELPERS ──
+
+        function refreshProfileUI(u) {
+          if (!u) return;
+          const pill = document.getElementById("profilePill");
+          pill.style.display = "flex";
+          document.getElementById("profileName").textContent = u.name;
+          document.getElementById("profileBadge").textContent = u.isGuest
             ? "👤"
             : "✓";
+
           const avatar = document.getElementById("profileAvatar");
           if (avatar) {
-            const [c1, c2] = Auth.avatarColors(user.name);
-            avatar.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
-            avatar.textContent = Auth.getInitials(user.name);
+            applyAvatarToEl(avatar, u);
           }
         }
 
-        // Tab switching for auth
+        // Apply avatar (emoji or initials + gradient) to any element
+        function applyAvatarToEl(el, u) {
+          const pfp = u.pfpEmoji || null;
+          if (pfp) {
+            el.textContent = pfp;
+            el.style.background = "rgba(255,255,255,.08)";
+            el.style.fontSize = "22px";
+          } else {
+            const [c1, c2] = Auth.avatarColors(u.name);
+            el.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+            el.style.fontSize = "";
+            el.textContent = Auth.getInitials(u.name);
+          }
+        }
+
+        function showGameUI() {
+          document.getElementById("authScreen").style.display = "none";
+          document.getElementById("modeSelector").style.display = "block";
+          refreshProfileUI(Auth.currentUser());
+        }
+
+        // ── AUTH TABS ──
         document.getElementById("tabLogin")?.addEventListener("click", () => {
           document.getElementById("tabLogin").classList.add("active");
           document.getElementById("tabRegister").classList.remove("active");
           document.getElementById("panelLogin").style.display = "";
           document.getElementById("panelRegister").style.display = "none";
         });
+
         document
           .getElementById("tabRegister")
           ?.addEventListener("click", () => {
@@ -738,7 +1013,7 @@
             document.getElementById("panelLogin").style.display = "none";
           });
 
-        // Login
+        // ── LOGIN ──
         document
           .querySelector(".authScreen .authPrimaryBtn")
           ?.addEventListener("click", async (e) => {
@@ -758,7 +1033,7 @@
             showGameUI();
           });
 
-        // Register - send verification code
+        // ── REGISTER ──
         document
           .getElementById("registerBtn")
           ?.addEventListener("click", async (e) => {
@@ -777,7 +1052,6 @@
               return;
             }
 
-            // Show verification step
             document.getElementById("regError").textContent = "";
             document.getElementById("registerBtn").textContent = "Sending...";
             document.getElementById("registerBtn").disabled = true;
@@ -794,7 +1068,6 @@
               return;
             }
 
-            // Show verification input
             document.getElementById("regName").style.display = "none";
             document.getElementById("regEmail").style.display = "none";
             document.getElementById("regPassword").style.display = "none";
@@ -805,150 +1078,136 @@
               verifySection = document.createElement("div");
               verifySection.id = "verifySection";
 
-              // Show styled HTML if available, otherwise show simple input
               if (result.styledHTML) {
                 verifySection.innerHTML =
                   result.styledHTML +
                   `
-              <div style="margin-top:20px;">
-                <input type="text" id="verifyCode" maxlength="4" 
-                  style="width:140px;padding:14px;font-size:22px;text-align:center;letter-spacing:10px;background:#1e293b;border:2px solid #475569;border-radius:12px;color:#fff;"
-                  placeholder="____" />
-              </div>
-              <button class="authPrimaryBtn" id="verifyRegisterBtn" style="margin-top:16px;">Verify Code</button>
-            `;
+                  <div style="margin-top:20px;">
+                    <input type="text" id="verifyCode" maxlength="4"
+                      style="width:140px;padding:14px;font-size:22px;text-align:center;letter-spacing:10px;background:#1e293b;border:2px solid #475569;border-radius:12px;color:#fff;"
+                      placeholder="____" />
+                  </div>
+                  <button class="authPrimaryBtn" id="verifyRegisterBtn" style="margin-top:16px;">Verify Code</button>
+                `;
               } else {
                 verifySection.innerHTML = `
-              <div style="text-align:center;margin-bottom:16px;">
-                <div style="font-size:14px;color:var(--text-muted);margin-bottom:12px;">
-                  Enter the 4-digit code sent to your email
-                </div>
-                <input type="text" id="verifyCode" maxlength="4" 
-                  style="width:120px;padding:12px;font-size:24px;text-align:center;letter-spacing:8px;"
-                  placeholder="****" />
-              </div>
-              <button class="authPrimaryBtn" id="verifyRegisterBtn">Verify</button>
-            `;
+                  <div style="text-align:center;margin-bottom:16px;">
+                    <div style="font-size:14px;color:var(--text-muted);margin-bottom:12px;">
+                      Enter the 4-digit code sent to your email
+                    </div>
+                    <input type="text" id="verifyCode" maxlength="4"
+                      style="width:120px;padding:12px;font-size:24px;text-align:center;letter-spacing:8px;"
+                      placeholder="****" />
+                  </div>
+                  <button class="authPrimaryBtn" id="verifyRegisterBtn">Verify</button>
+                `;
               }
 
               document
                 .getElementById("panelRegister")
                 .appendChild(verifySection);
 
-              // Handle verification
               document
                 .getElementById("verifyRegisterBtn")
                 ?.addEventListener("click", async () => {
-                  console.log("Verify button clicked");
-                  const codeInput = document.getElementById("verifyCode");
-                  const code = String(codeInput?.value || "").trim();
-                  console.log("Code entered:", code, "length:", code.length);
-
+                  const code = String(
+                    document.getElementById("verifyCode")?.value || "",
+                  ).trim();
                   if (!code || code.length !== 4 || !/^\d{4}$/.test(code)) {
                     alert("Please enter 4-digit code");
                     return;
                   }
-
                   const result = await Auth.registerVerify(code);
-                  console.log("Verification result:", result);
-
                   if (!result.ok) {
                     alert(result.error);
                     return;
                   }
-
-                  console.log("Registration successful, showing game UI");
                   showGameUI();
                 });
 
-              // Also handle Enter key on verification input
               document
                 .getElementById("verifyCode")
-                ?.addEventListener("keydown", async (e) => {
-                  if (e.key === "Enter") {
+                ?.addEventListener("keydown", (e) => {
+                  if (e.key === "Enter")
                     document.getElementById("verifyRegisterBtn")?.click();
-                  }
                 });
             }
             verifySection.style.display = "block";
           });
 
-        // Guest
+        // ── GUEST ──
         document.getElementById("guestBtn")?.addEventListener("click", () => {
           const name = document.getElementById("guestName")?.value || "Guest";
           const result = Auth.loginAsGuest(name);
-          if (result.ok) {
-            showGameUI();
-          }
+          if (result.ok) showGameUI();
         });
 
-        // Show game UI
-        function showGameUI() {
-          document.getElementById("authScreen").style.display = "none";
-          document.getElementById("modeSelector").style.display = "block";
-          document.getElementById("profilePill").style.display = "flex";
-          const user = Auth.currentUser();
-          if (user) {
-            document.getElementById("profileName").textContent = user.name;
-            document.getElementById("profileBadge").textContent = user.isGuest
-              ? "👤"
-              : "✓";
-            const avatar = document.getElementById("profileAvatar");
-            if (avatar) {
-              const [c1, c2] = Auth.avatarColors(user.name);
-              avatar.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
-              avatar.textContent = Auth.getInitials(user.name);
-            }
-          }
+        // ── PROFILE PILL DROPDOWN (3 DOTS) ──
+        const profileMenuBtn = document.getElementById("profileMenuBtn");
+        const profileDropdown = document.getElementById("profileDropdown");
+
+        if (profileMenuBtn) {
+          profileMenuBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            console.log("Profile menu clicked");
+            const isHidden = profileDropdown.style.display === "none";
+            profileDropdown.style.display = isHidden ? "block" : "none";
+          });
         }
 
-        // Profile dropdown
-        document
-          .getElementById("profileMenuBtn")
-          ?.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const dropdown = document.getElementById("profileDropdown");
-            dropdown.style.display =
-              dropdown.style.display === "none" ? "block" : "none";
-          });
-       
-
-        // User menu toggle
+        // ── USER BUTTON DROPDOWN ──
         const userBtn = document.getElementById("userBtn");
         const userDropdown = document.getElementById("userDropdown");
-        userBtn?.addEventListener("click", (e) => {
-          e.stopPropagation();
-          userDropdown.style.display =
-            userDropdown.style.display === "none" ? "block" : "none";
 
-          // Update menu based on login state
-          const user = Auth.currentUser();
-          if (user) {
-            document.getElementById("userMenuGuest").style.display = "none";
-            document.getElementById("userMenuLogged").style.display = "block";
-            document.getElementById("menuUserName").textContent = user.name;
-            document.getElementById("menuUserStatus").textContent = user.isGuest
-              ? "👤"
-              : "✓";
-            const menuAvatar = document.getElementById("menuAvatar");
-            const [c1, c2] = Auth.avatarColors(user.name);
-            menuAvatar.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
-            menuAvatar.textContent = Auth.getInitials(user.name);
-          } else {
-            document.getElementById("userMenuGuest").style.display = "block";
-            document.getElementById("userMenuLogged").style.display = "none";
+        if (userBtn) {
+          userBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            console.log("User button clicked");
+            const isHidden = userDropdown.style.display === "none";
+            userDropdown.style.display = isHidden ? "block" : "none";
+
+            const u = Auth.currentUser();
+            if (u) {
+              document.getElementById("userMenuGuest").style.display = "none";
+              document.getElementById("userMenuLogged").style.display = "block";
+              document.getElementById("menuUserName").textContent = u.name;
+              document.getElementById("menuUserStatus").textContent = u.isGuest
+                ? "👤"
+                : "✓";
+              const menuAvatar = document.getElementById("menuAvatar");
+              applyAvatarToEl(menuAvatar, u);
+            } else {
+              document.getElementById("userMenuGuest").style.display = "block";
+              document.getElementById("userMenuLogged").style.display = "none";
+            }
+          });
+        }
+
+        // Close dropdowns when clicking anywhere else on the document
+        document.addEventListener("click", (e) => {
+          // Close profile dropdown if clicking outside
+          if (profileDropdown && profileMenuBtn) {
+            if (
+              !profileMenuBtn.contains(e.target) &&
+              !profileDropdown.contains(e.target)
+            ) {
+              profileDropdown.style.display = "none";
+            }
+          }
+          // Close user dropdown if clicking outside
+          if (userDropdown && userBtn) {
+            if (
+              !userBtn.contains(e.target) &&
+              !userDropdown.contains(e.target)
+            ) {
+              userDropdown.style.display = "none";
+            }
           }
         });
-document.addEventListener("click", (e) => {
-  if (!e.target.closest("#profileMenuBtn") && !e.target.closest("#profileDropdown")) {
-    document.getElementById("profileDropdown").style.display = "none";
-  }
-  if (!e.target.closest("#userBtn") && !e.target.closest("#userDropdown")) {
-    userDropdown.style.display = "none";
-  }
-});
 
-        // User menu: Login
+        // ── USER MENU ACTIONS ──
         document
           .getElementById("menuLoginBtn")
           ?.addEventListener("click", () => {
@@ -958,7 +1217,6 @@ document.addEventListener("click", (e) => {
             document.getElementById("modeSelector").style.display = "none";
           });
 
-        // User menu: Register
         document
           .getElementById("menuRegisterBtn")
           ?.addEventListener("click", () => {
@@ -968,26 +1226,21 @@ document.addEventListener("click", (e) => {
             document.getElementById("modeSelector").style.display = "none";
           });
 
-        // User menu: Guest
         document
           .getElementById("menuGuestBtn")
           ?.addEventListener("click", () => {
             userDropdown.style.display = "none";
             const result = Auth.loginAsGuest("Guest");
-            if (result.ok) {
-              showGameUI();
-            }
+            if (result.ok) showGameUI();
           });
 
-        // User menu: Edit Profile
         document
           .getElementById("menuEditProfileBtn")
           ?.addEventListener("click", () => {
             userDropdown.style.display = "none";
-            document.getElementById("editProfileModal").hidden = false;
+            openEditProfile();
           });
 
-        // User menu: Logout
         document
           .getElementById("menuLogoutBtn")
           ?.addEventListener("click", () => {
@@ -999,7 +1252,14 @@ document.addEventListener("click", (e) => {
             document.getElementById("authScreen").style.display = "flex";
           });
 
-        // Logout
+        // ── PROFILE DROPDOWN ACTIONS ──
+        document
+          .getElementById("editProfileBtn")
+          ?.addEventListener("click", () => {
+            document.getElementById("profileDropdown").style.display = "none";
+            openEditProfile();
+          });
+
         document.getElementById("logoutBtn")?.addEventListener("click", () => {
           Auth.logout();
           document.getElementById("profilePill").style.display = "none";
@@ -1007,7 +1267,247 @@ document.addEventListener("click", (e) => {
           document.getElementById("modeSelector").style.display = "none";
           document.getElementById("authScreen").style.display = "flex";
         });
-      });
+
+        // ── CLOSE AUTH MODAL ──
+        document
+          .getElementById("closeAuthBtn")
+          ?.addEventListener("click", () => {
+            document.getElementById("authModal").hidden = true;
+          });
+
+        // ════════════════════════════════════════
+        //  EDIT PROFILE MODAL
+        // ════════════════════════════════════════
+
+        const EMOJI_LIST = [
+          "😀",
+          "😎",
+          "🤩",
+          "🥳",
+          "🐯",
+          "🦁",
+          "🐻",
+          "🐼",
+          "🦊",
+          "🐺",
+          "🦝",
+          "🐸",
+          "🐙",
+          "🦋",
+          "🐉",
+          "🦄",
+          "🍕",
+          "🎮",
+          "⚡",
+          "🔥",
+          "💎",
+          "🌟",
+          "🎯",
+          "🏆",
+          "🚀",
+          "🎸",
+          "🎲",
+          "🃏",
+          "👾",
+          "🤖",
+          "💀",
+          "👻",
+        ];
+
+        const COLOR_PAIRS = [
+          ["#10b981", "#059669"],
+          ["#3b82f6", "#2563eb"],
+          ["#f59e0b", "#d97706"],
+          ["#ec4899", "#db2777"],
+          ["#8b5cf6", "#7c3aed"],
+          ["#ef4444", "#dc2626"],
+          ["#06b6d4", "#0891b2"],
+          ["#84cc16", "#65a30d"],
+        ];
+
+        let selectedEmoji = null; // null = use initials
+        let selectedColors = null; // null = use name-based colors
+
+        // Build emoji grid
+        const emojiGrid = document.getElementById("emojiGrid");
+        EMOJI_LIST.forEach((em) => {
+          const btn = document.createElement("button");
+          btn.className = "emojiOption";
+          btn.textContent = em;
+          btn.addEventListener("click", () => {
+            selectedEmoji = em;
+            selectedColors = null;
+            // clear color selection
+            document
+              .querySelectorAll(".colorSwatch")
+              .forEach((s) => s.classList.remove("selected"));
+            document
+              .querySelectorAll(".emojiOption")
+              .forEach((s) => s.classList.remove("selected"));
+            btn.classList.add("selected");
+            updateEditPreview();
+          });
+          emojiGrid.appendChild(btn);
+        });
+
+        // Build color swatches
+        const colorSwatches = document.getElementById("colorSwatches");
+        COLOR_PAIRS.forEach(([c1, c2]) => {
+          const sw = document.createElement("div");
+          sw.className = "colorSwatch";
+          sw.style.background = `linear-gradient(135deg, ${c1}, ${c2})`;
+          sw.dataset.c1 = c1;
+          sw.dataset.c2 = c2;
+          sw.addEventListener("click", () => {
+            selectedColors = [c1, c2];
+            selectedEmoji = null;
+            document
+              .querySelectorAll(".emojiOption")
+              .forEach((s) => s.classList.remove("selected"));
+            document
+              .querySelectorAll(".colorSwatch")
+              .forEach((s) => s.classList.remove("selected"));
+            sw.classList.add("selected");
+            updateEditPreview();
+          });
+          colorSwatches.appendChild(sw);
+        });
+
+        function updateEditPreview() {
+          const preview = document.getElementById("editAvatarPreview");
+          const nameVal = document.getElementById("editNameInput").value.trim();
+          const hint = preview.querySelector(".avatarEditHint");
+
+          if (selectedEmoji) {
+            // Remove hint from textContent trick — use separate span
+            preview.innerHTML = `<span style="font-size:36px">${selectedEmoji}</span><span class="avatarEditHint">✏️</span>`;
+            preview.style.background = "rgba(255,255,255,.08)";
+          } else {
+            const colors =
+              selectedColors ||
+              (nameVal.length >= 2
+                ? Auth.avatarColors(nameVal)
+                : ["#10b981", "#059669"]);
+            preview.style.background = `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`;
+            const displayName = nameVal || Auth.currentUser()?.name || "?";
+            const initials = Auth.getInitials(displayName);
+            preview.innerHTML = `<span style="font-size:28px;font-weight:900">${initials}</span><span class="avatarEditHint">✏️</span>`;
+          }
+        }
+
+        document
+          .getElementById("editNameInput")
+          .addEventListener("input", updateEditPreview);
+
+        function openEditProfile() {
+          const u = Auth.currentUser();
+          if (!u) return;
+
+          // Pre-fill current name
+          document.getElementById("editNameInput").value = u.name;
+          document.getElementById("editProfileError").textContent = "";
+
+          // Reset selections
+          selectedEmoji = u.pfpEmoji || null;
+          selectedColors = null;
+          document.querySelectorAll(".emojiOption").forEach((btn) => {
+            btn.classList.toggle("selected", btn.textContent === selectedEmoji);
+          });
+          document
+            .querySelectorAll(".colorSwatch")
+            .forEach((sw) => sw.classList.remove("selected"));
+
+          updateEditPreview();
+          document.getElementById("editProfileModal").style.display = "flex";
+        }
+
+        document
+          .getElementById("editProfileCloseBtn")
+          .addEventListener("click", () => {
+            document.getElementById("editProfileModal").style.display = "none";
+          });
+
+        // Close on overlay click
+        document
+          .getElementById("editProfileModal")
+          .addEventListener("click", (e) => {
+            if (e.target === document.getElementById("editProfileModal")) {
+              document.getElementById("editProfileModal").style.display =
+                "none";
+            }
+          });
+
+        document
+          .getElementById("editProfileSaveBtn")
+          .addEventListener("click", async () => {
+            const newName = document
+              .getElementById("editNameInput")
+              .value.trim();
+            const errEl = document.getElementById("editProfileError");
+            const saveBtn = document.getElementById("editProfileSaveBtn");
+
+            if (!newName || newName.length < 2) {
+              errEl.textContent = "Name must be at least 2 characters.";
+              return;
+            }
+
+            errEl.textContent = "";
+            saveBtn.disabled = true;
+            saveBtn.textContent = "Saving...";
+
+            // Update name via Auth
+            const result = await Auth.updateProfile({ name: newName });
+
+            if (!result.ok) {
+              errEl.textContent = result.error;
+              saveBtn.disabled = false;
+              saveBtn.textContent = "Save Changes";
+              return;
+            }
+
+            // Save emoji/color choice into session manually
+            // (Auth.updateProfile only handles name — we persist pfp in localStorage session)
+            const session = JSON.parse(
+              localStorage.getItem("wl_session") || "null",
+            );
+            if (session) {
+              if (selectedEmoji) {
+                session.pfpEmoji = selectedEmoji;
+              } else {
+                delete session.pfpEmoji;
+              }
+              if (selectedColors) {
+                session.avatarColor1 = selectedColors[0];
+                session.avatarColor2 = selectedColors[1];
+              }
+              localStorage.setItem("wl_session", JSON.stringify(session));
+
+              // Also update in users store
+              const users = JSON.parse(
+                localStorage.getItem("wl_users") || "{}",
+              );
+              if (session.email && users[session.email]) {
+                if (selectedEmoji) {
+                  users[session.email].pfpEmoji = selectedEmoji;
+                } else {
+                  delete users[session.email].pfpEmoji;
+                }
+                if (selectedColors) {
+                  users[session.email].avatarColor1 = selectedColors[0];
+                  users[session.email].avatarColor2 = selectedColors[1];
+                }
+                localStorage.setItem("wl_users", JSON.stringify(users));
+              }
+            }
+
+            saveBtn.disabled = false;
+            saveBtn.textContent = "Save Changes";
+
+            // Refresh all UI
+            refreshProfileUI(Auth.currentUser());
+            document.getElementById("editProfileModal").style.display = "none";
+          });
+      }); // end DOMContentLoaded
 
       // Ad visibility toggle (for testing)
       window.toggleAds = function (show) {
@@ -1016,11 +1516,6 @@ document.addEventListener("click", (e) => {
           if (el) el.style.display = show ? "flex" : "none";
         });
       };
-
-      // Close auth modal
-      document.getElementById("closeAuthBtn")?.addEventListener("click", () => {
-        document.getElementById("authModal").hidden = true;
-      });
     </script>
   </body>
 </html>

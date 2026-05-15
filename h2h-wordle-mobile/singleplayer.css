@@ -64,6 +64,8 @@ body {
   padding: 48px 32px;
   box-shadow: 0 20px 60px var(--shadow);
   animation: fadeInUp 0.6s ease;
+  position: relative;
+  z-index: 10;
 }
 
 @keyframes fadeInUp {
@@ -1041,7 +1043,6 @@ body {
   background-image: none !important;
 }
 
-
 /* Mobile keyboard fix - white PVP style with zoom prevention */
 @media (max-width: 640px) {
   .keyboard {
@@ -1098,7 +1099,8 @@ body {
   }
 
   /* Prevent zoom on input focus */
-  input, select {
+  input,
+  select {
     font-size: 16px;
   }
 
@@ -1133,7 +1135,6 @@ body {
   }
 }
 
-
 /* Refresh tip message */
 .refreshTip {
   display: flex;
@@ -1158,7 +1159,8 @@ body {
 }
 
 @keyframes pulseGlow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
   }
   50% {
@@ -1197,7 +1199,11 @@ body {
   justify-content: center;
   gap: 10px;
   padding: 16px 24px;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.2));
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.2),
+    rgba(59, 130, 246, 0.2)
+  );
   border: 2px solid rgba(16, 185, 129, 0.4);
   border-radius: 16px;
   color: var(--text-primary);
@@ -1225,7 +1231,7 @@ body {
 .refreshBtn:hover {
   border-color: var(--accent-primary);
   transform: translateY(-4px);
-  box-shadow: 
+  box-shadow:
     0 8px 24px rgba(16, 185, 129, 0.3),
     0 0 40px rgba(16, 185, 129, 0.2);
 }
@@ -1290,7 +1296,7 @@ body {
     padding: 14px 20px;
     font-size: 14px;
   }
-  
+
   .refreshBtn .refreshIcon {
     font-size: 18px;
   }
@@ -1359,6 +1365,7 @@ body {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
+  pointer-events: auto;
 }
 
 .userBtn:hover {
@@ -1379,15 +1386,21 @@ body {
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
-  z-index: 200;
+  z-index: 300;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   min-width: 200px;
   animation: dropIn 0.15s ease;
 }
 
 @keyframes dropIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .userMenuHeader {
@@ -1583,23 +1596,39 @@ body {
 
 /* ===== QUICK MATCH & BROWSE BUTTONS ===== */
 .modeBtn.quickmatch {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1),
+    rgba(16, 185, 129, 0.1)
+  );
   border-color: rgba(59, 130, 246, 0.3);
 }
 
 .modeBtn.quickmatch:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(16, 185, 129, 0.2));
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.2),
+    rgba(16, 185, 129, 0.2)
+  );
   border-color: rgba(59, 130, 246, 0.5);
   transform: translateY(-4px);
 }
 
 .modeBtn.browse {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.1),
+    rgba(236, 72, 153, 0.1)
+  );
   border-color: rgba(139, 92, 246, 0.3);
 }
 
 .modeBtn.browse:hover {
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.2),
+    rgba(236, 72, 153, 0.2)
+  );
   border-color: rgba(139, 92, 246, 0.5);
   transform: translateY(-4px);
 }
@@ -1610,17 +1639,17 @@ body {
     padding: 8px 12px;
     font-size: 13px;
   }
-  
+
   .roomsBrowserCard {
     max-height: 90vh;
   }
-  
+
   .roomItem {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
-  
+
   .roomsActions {
     flex-direction: column;
   }
@@ -1675,21 +1704,29 @@ body {
   justify-content: center;
   padding: 20px;
   background:
-    radial-gradient(circle at 25% 30%, rgba(16,185,129,.12) 0%, transparent 55%),
-    radial-gradient(circle at 75% 70%, rgba(59,130,246,.1) 0%, transparent 55%),
+    radial-gradient(
+      circle at 25% 30%,
+      rgba(16, 185, 129, 0.12) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 75% 70%,
+      rgba(59, 130, 246, 0.1) 0%,
+      transparent 55%
+    ),
     linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-mid) 100%);
 }
 
 .authCard {
   max-width: 420px;
   width: 100%;
-  background: rgba(31,41,55,.85);
+  background: rgba(31, 41, 55, 0.85);
   backdrop-filter: blur(24px);
   border: 1px solid var(--border);
   border-radius: 28px;
   padding: 40px 32px 36px;
-  box-shadow: 0 24px 64px rgba(0,0,0,.5);
-  animation: fadeInUp .5s ease;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  animation: fadeInUp 0.5s ease;
 }
 
 .authLogo {
@@ -1701,7 +1738,11 @@ body {
   font-size: 36px;
   font-weight: 900;
   letter-spacing: 5px;
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  background: linear-gradient(
+    135deg,
+    var(--accent-primary),
+    var(--accent-secondary)
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1728,7 +1769,7 @@ body {
 /* Tabs */
 .authTabs {
   display: flex;
-  background: rgba(0,0,0,.25);
+  background: rgba(0, 0, 0, 0.25);
   border-radius: 14px;
   padding: 4px;
   margin-bottom: 24px;
@@ -1745,13 +1786,13 @@ body {
   padding: 10px;
   border-radius: 10px;
   cursor: pointer;
-  transition: all .25s ease;
+  transition: all 0.25s ease;
 }
 
 .authTab.active {
-  background: rgba(16,185,129,.18);
+  background: rgba(16, 185, 129, 0.18);
   color: var(--accent-primary);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 /* Fields */
@@ -1771,12 +1812,12 @@ body {
   font-size: 13px;
   font-weight: 700;
   color: var(--text-secondary);
-  letter-spacing: .3px;
+  letter-spacing: 0.3px;
 }
 
 .authField input,
 .guestInput {
-  background: rgba(0,0,0,.3);
+  background: rgba(0, 0, 0, 0.3);
   border: 1.5px solid var(--border);
   border-radius: 12px;
   color: var(--text-primary);
@@ -1784,7 +1825,7 @@ body {
   padding: 12px 16px;
   outline: none;
   width: 100%;
-  transition: border-color .2s;
+  transition: border-color 0.2s;
 }
 
 .authField input:focus,
@@ -1809,12 +1850,14 @@ body {
   border: none;
   cursor: pointer;
   font-size: 16px;
-  opacity: .5;
+  opacity: 0.5;
   padding: 4px;
-  transition: opacity .2s;
+  transition: opacity 0.2s;
 }
 
-.eyeBtn:hover { opacity: .9; }
+.eyeBtn:hover {
+  opacity: 0.9;
+}
 
 /* Error */
 .authError {
@@ -1836,20 +1879,22 @@ body {
   font-weight: 800;
   padding: 14px;
   cursor: pointer;
-  letter-spacing: .5px;
-  transition: all .25s ease;
-  box-shadow: 0 4px 16px rgba(16,185,129,.3);
+  letter-spacing: 0.5px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
 }
 
 .authPrimaryBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(16,185,129,.4);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
 }
 
-.authPrimaryBtn:active { transform: translateY(0); }
+.authPrimaryBtn:active {
+  transform: translateY(0);
+}
 
 .authPrimaryBtn:disabled {
-  opacity: .5;
+  opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
@@ -1864,7 +1909,7 @@ body {
 
 .authDivider::before,
 .authDivider::after {
-  content: '';
+  content: "";
   flex: 1;
   height: 1px;
   background: var(--border);
@@ -1874,7 +1919,7 @@ body {
   font-size: 12px;
   color: var(--text-muted);
   font-weight: 600;
-  letter-spacing: .5px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -1892,7 +1937,7 @@ body {
 
 .guestBtn {
   flex-shrink: 0;
-  background: rgba(255,255,255,.07);
+  background: rgba(255, 255, 255, 0.07);
   border: 1.5px solid var(--border);
   border-radius: 12px;
   color: var(--text-primary);
@@ -1901,12 +1946,12 @@ body {
   padding: 12px 14px;
   cursor: pointer;
   white-space: nowrap;
-  transition: all .2s ease;
+  transition: all 0.2s ease;
 }
 
 .guestBtn:hover {
   border-color: var(--accent-secondary);
-  background: rgba(59,130,246,.1);
+  background: rgba(59, 130, 246, 0.1);
   color: #93c5fd;
 }
 
@@ -1917,12 +1962,13 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(0,0,0,.25);
+  background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--border);
   border-radius: 50px;
   padding: 6px 6px 6px 6px;
   margin-bottom: 20px;
   position: relative;
+  z-index: 100;
 }
 
 .profileAvatar {
@@ -1974,11 +2020,12 @@ body {
   padding: 4px 8px;
   border-radius: 8px;
   line-height: 1;
-  transition: all .2s;
+  transition: all 0.2s;
+  pointer-events: auto;
 }
 
 .profileMenuBtn:hover {
-  background: rgba(255,255,255,.07);
+  background: rgba(255, 255, 255, 0.07);
   color: var(--text-primary);
 }
 
@@ -1987,20 +2034,26 @@ body {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  left: 0;
-  background: rgba(31,41,55,.97);
+  min-width: 180px;
+  background: rgba(31, 41, 55, 0.98);
   backdrop-filter: blur(16px);
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow: hidden;
-  z-index: 200;
-  box-shadow: 0 8px 32px rgba(0,0,0,.5);
-  animation: dropIn .15s ease;
+  z-index: 300;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: dropIn 0.15s ease;
 }
 
 @keyframes dropIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .profileDropItem {
@@ -2014,15 +2067,23 @@ body {
   padding: 14px 20px;
   text-align: left;
   cursor: pointer;
-  transition: background .15s;
+  transition: background 0.15s;
 }
 
-.profileDropItem:hover { background: rgba(255,255,255,.06); }
-.profileDropItem.danger { color: var(--accent-danger); }
-.profileDropItem.danger:hover { background: rgba(239,68,68,.1); }
+.profileDropItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.profileDropItem.danger {
+  color: var(--accent-danger);
+}
+.profileDropItem.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
 
 /* ── modeCard relative positioning for dropdown ── */
-.modeCard { position: relative; }
+.modeCard {
+  position: relative;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    VERIFICATION CODE STYLES
@@ -2047,10 +2108,22 @@ body {
   display: inline-block;
 }
 
-.codeDigit:nth-child(1) { border-color: #60a5fa; transform: rotate(-3deg); }
-.codeDigit:nth-child(2) { border-color: #facc15; transform: rotate(2deg); }
-.codeDigit:nth-child(3) { border-color: #fb923c; transform: rotate(-2deg); }
-.codeDigit:nth-child(4) { border-color: #4ade80; transform: rotate(3deg); }
+.codeDigit:nth-child(1) {
+  border-color: #60a5fa;
+  transform: rotate(-3deg);
+}
+.codeDigit:nth-child(2) {
+  border-color: #facc15;
+  transform: rotate(2deg);
+}
+.codeDigit:nth-child(3) {
+  border-color: #fb923c;
+  transform: rotate(-2deg);
+}
+.codeDigit:nth-child(4) {
+  border-color: #4ade80;
+  transform: rotate(3deg);
+}
 
 .verifyText {
   font-size: 15px;
